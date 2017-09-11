@@ -1,7 +1,12 @@
+import 'babel-polyfill' // 对ES 6 API进行转义
+// 'babel-runtime辅助编译 无需写在源码里
 import Vue from 'vue'
 import App from './App' // 引入根组件
+import fastclick from 'fastclick'
 
 import 'common/stylus/index.styl' // 没配置common的别名的话会尝试从node_modules里去找 让你去"安装" 它并不是node里的模块
+
+fastclick.attach(document.body) // 解决移动端点击300ms的延时
 
 /* eslint-disable no-new */
 new Vue({
