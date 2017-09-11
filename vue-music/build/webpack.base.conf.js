@@ -4,7 +4,7 @@ var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
 
 function resolve (dir) {  // 配置别名 简化写法
-  return path.join(__dirname, '..', dir)  // __dirname是build目录(本js文件所在目录) 出这个目录 进dir
+  return path.join(__dirname, '..', dir)  // __dirname是js文件所在目录
 }
 
 module.exports = {
