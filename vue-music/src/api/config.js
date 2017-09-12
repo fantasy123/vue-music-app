@@ -8,7 +8,7 @@ export const commonParams = { // 拼接到url的data中公用的部分
 }
 
 export const options = {
-  param: 'jsonpCallback'
+  param: 'jsonpCallback'  // 前后端约定的参数名
 }
 
 export const ERR_OK = 0
