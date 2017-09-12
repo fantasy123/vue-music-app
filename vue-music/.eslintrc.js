@@ -24,6 +24,7 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'eol-last' : 0, // 不检测新文件末尾是否有空行
-    'space-before-function-paren' : 0
+    'space-before-function-paren' : 0,
+    'no-trailing-spaces' : 0
   }
 }
