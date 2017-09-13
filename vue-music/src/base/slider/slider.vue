@@ -126,6 +126,9 @@
           this.slider.goToPage(pageIndex, 0, 400) // x 横轴的页数 y 纵轴的页数 动画执行时间
         }, this.interval)
       }
+    },
+    destroyed() {
+      clearTimeout(this.timer)  // slider组件被切走(组件销毁) 组件会调用destroyed这个hook 这时清理一下计时器 释放一下内存
     }
   }
 </script>

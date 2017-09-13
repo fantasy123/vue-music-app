@@ -23,7 +23,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {getRecommend} from 'api/recommend'
+  import { getRecommend, getDiscList } from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import Slider from 'base/slider/slider'
 
@@ -35,12 +35,20 @@
     },
     created() { // 这个钩子获取数据
       this._getRecommend() // 这是一个异步过程 因为获取真实数据 所以有几秒延时
+      this._getDiscList()
     },
     methods: {
       _getRecommend() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
             this.recommends = res.data.slider
+          }
+        })
+      },
+      _getDiscList() {
+        getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            console.log(res.data.list)
           }
         })
       }

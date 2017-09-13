@@ -3,7 +3,10 @@
     <m-header></m-header>
     <tab></tab>
     <!--组件会渲染到这个rouuter-view上 通过tab组件切换-->
-    <router-view></router-view>
+    <keep-alive>
+      <!--将DOM缓存到内存中,切换路由的时候不必再次渲染,也不必再次发送请求-->
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
