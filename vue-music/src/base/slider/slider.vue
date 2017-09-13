@@ -44,15 +44,25 @@
         this._initDots()  // 使与幻灯片数目一致
         this._initSlider()
 
-        if (this.autoPlay) {
-//          this._play()  // 自动播放
+        // dom ready时调用一次
+        if (this.autoPlay) {  // 如果自动播放标志位设置为真
+          this._play()  // 设定定时器滑动一次
         }
+
+        window.addEventListener('resize', () => {
+          if (!this.slider) { // slider还没有初始化
+            return
+          }
+
+          // 重新设置宽度
+          this._setSliderWidth(true)  // resize标志位设为true 不再复制幻灯片
+          this.slider.refresh()  // better-scroll重新计算
+        })
       }, 20) // 浏览器刷新率为17ms 设低于它的值都无效
     },
     methods: {
-      _setSliderWidth () {  // 横向滚动需要设置slider宽度作为水平视口
+      _setSliderWidth (boolResize) {  // 横向滚动需要设置slider宽度作为水平视口
         this.children = this.$refs.sliderGroup.children // 幻灯片node-list
-        console.log(this.children.length)
 
         let width = 0 // 初始化group宽度
         let sliderWidth = this.$refs.slider.clientWidth // 每张幻灯片的宽度都等于slider容器的宽度 (clientWidth是html DOM API)
@@ -64,8 +74,10 @@
           width += sliderWidth  // 累加group的宽度
         }
 
-        if (this.loop) {  // 如果要循环 左右要克隆2个幻灯片 保证循环切换
-          width += 2 * sliderWidth
+        if (this.loop && !boolResize) {  // 如果要循环 左右要克隆2个幻灯片 保证循环切换
+          width += 2 * sliderWidth  // 只需要在第一次设置sliderWidth的时候复制幻灯片 重新调整窗口大小的时候不需要复制
+          // 第一次调用_setSliderWidth时没有传入boolResize 这时是undefined !boolResize为true 可以复制幻灯片
+          // resize的时候继续调用_setSliderWidth boolResize传入true 阻止幻灯片复制
         }
 
         this.$refs.sliderGroup.style.width = width + 'px' // group横向不能自动撑开 所以要计算并手动设置它的宽度
@@ -83,6 +95,7 @@
           snapLoop: this.loop,  // 是否循环 外部传入
           snapThreshold: 0.3,
           snapSpeed: 400
+          // click设为true会与fastclick库冲突
         })
 
         this.slider.on('scrollEnd', () => { // 监听better-scroll scrollEnd事件
@@ -93,17 +106,24 @@
           }
 
           this.currentPageIndex = BSIndex // 根据横轴方向的页面数设置当前激活索引 index等于激活索引的那个dot会被激活
+
+          if (this.autoPlay) {  // 如果自动播放标志位设置为真
+            clearTimeout(this.timer)  // 必须清除上一次定时器
+            this._play()  // 设定定时器滑动一次
+          }
+          // 总结:初始化(dom ready)的时候 执行 this._play() 开一个定时器 到时间滑动一次 从而触发了scrollEnd事件 继续执行this._play() 生生不息
+          // 手动划屏也会触发scrollEnd事件 不要忘记autoPlay标志位的判断
         })
       },
       _play() {
-        let NextPageIndex = this.currentPageIndex + 1
+        let pageIndex = this.currentPageIndex + 1
 
         if (this.loop) {
-          NextPageIndex += 1  // this.currentPageIndex从0开始 pageIndex比它要多一个
+          pageIndex += 1
         }
 
         this.timer = setTimeout(() => {
-          this.slider.goToPage(NextPageIndex, 0, 400) // x 横轴的页数 y 纵轴的页数 动画执行时间
+          this.slider.goToPage(pageIndex, 0, 400) // x 横轴的页数 y 纵轴的页数 动画执行时间
         }, this.interval)
       }
     }
