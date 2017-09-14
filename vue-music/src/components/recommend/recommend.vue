@@ -1,35 +1,40 @@
 <template>
   <div class="recommend">
-    <div class="recommend-content">
-      <div class="slider-wrapper" v-if="recommends.length">
-        <!--recommends数据获得有延迟 slot里的数据不能及时填充的话 宽度计算 addClass等都会报错 所以数据就位前 这一块先不渲染-->
-        <slider>
-          <!--slot插槽内容开始(一张张幻灯片)-->
-          <div v-for="item in recommends">
-            <a :href="item.linkUrl">
-              <img :src="item.picUrl">
-            </a>
-          </div>
-          <!--slot插槽内容结束-->
-        </slider>
+    <!--prpos down 令scroll组件监听歌单列表数据的变化 动态刷新 重新计算高度-->
+    <scroll class="recommend-content" :data="discList">
+      <!--better-scroll只能滚动第一个子元素 所以有2个元素时需要拿一个div包起来-->
+      <!--以下内容填到scroll组件的插槽里-->
+      <div>
+        <div class="slider-wrapper" v-if="recommends.length">
+          <!--recommends数据获得有延迟 slot里的数据不能及时填充的话 宽度计算 addClass等都会报错 所以数据就位前 这一块先不渲染-->
+          <slider>
+            <!--slot插槽内容开始(一张张幻灯片)-->
+            <div v-for="item in recommends">
+              <a :href="item.linkUrl">
+                <img :src="item.picUrl">
+              </a>
+            </div>
+            <!--slot插槽内容结束-->
+          </slider>
 
+        </div>
+        <div class="recommend-list">
+          <h1 class="list-title">热门歌单推荐</h1>
+          <ul>
+            <li v-for="item in discList" class="item">
+              <div class="icon">
+                <img width="60" height="60" :src="item.imgurl">
+              </div>
+              <div class="text">
+                <!--涉及到字符实体,需要转义-->
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="recommend-list">
-        <h1 class="list-title">热门歌单推荐</h1>
-        <ul>
-          <li v-for="item in discList" class="item">
-            <div class="icon">
-              <img width="60" height="60" :src="item.imgurl">
-            </div>
-            <div class="text">
-              <!--涉及到字符实体,需要转义-->
-              <h2 class="name" v-html="item.creator.name"></h2>
-              <p class="desc" v-html="item.dissname"></p>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
@@ -37,6 +42,7 @@
   import { getRecommend, getDiscList } from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import Slider from 'base/slider/slider'
+  import Scroll from 'base/scroll/scroll'
 
   export default {
     data () {
@@ -66,7 +72,8 @@
       }
     },
     components: {
-      Slider
+      Slider,
+      Scroll
     }
   }
 </script>
