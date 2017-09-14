@@ -16,7 +16,18 @@
       </div>
       <div class="recommend-list">
         <h1 class="list-title">热门歌单推荐</h1>
-        <ul></ul>
+        <ul>
+          <li v-for="item in discList" class="item">
+            <div class="icon">
+              <img width="60" height="60" :src="item.imgurl">
+            </div>
+            <div class="text">
+              <!--涉及到字符实体,需要转义-->
+              <h2 class="name" v-html="item.creator.name"></h2>
+              <p class="desc" v-html="item.dissname"></p>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -30,7 +41,8 @@
   export default {
     data () {
       return {
-        recommends: []
+        recommends: [],
+        discList: []
       }
     },
     created() { // 这个钩子获取数据
@@ -48,7 +60,7 @@
       _getDiscList() {
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res.data.list)
+            this.discList = res.data.list
           }
         })
       }
@@ -84,25 +96,25 @@
         .item
           display: flex
           box-sizing: border-box
-          //align-items: center
-          //padding: 0 20px 20px 20px
+          align-items: center // 交叉轴上居中对齐 横向一字排开(图片和文字垂直方向居中)
+          padding: 0 20px 20px 20px
           .icon
-            //flex: 0 0 60px
-            //width: 60px
-            //padding-right: 20px
+            flex: 0 0 60px
+            width: 60px
+            padding-right: 20px
           .text
-            //display: flex
-            //flex-direction: column
-            //justify-content: center
-            //flex: 1
-            //line-height: 20px
+            display: flex // 同时又是name和desc的父元素
+            flex-direction: column  // 纵向排布
+            justify-content: center // 元素聚在中间 元素间无间隔(文字在右边块水平居中)
+            flex: 1 // 是.item的子元素
+            line-height: 20px
             overflow: hidden
-            //font-size: $font-size-medium
+            font-size: $font-size-medium
             .name
               color: $color-text
-              //margin-bottom: 10px
+              margin-bottom: 10px
             .desc
-              //color: $color-text-d
+              color: $color-text-d
       .loading-container
         //position: absolute
         //width: 100%
