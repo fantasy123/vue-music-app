@@ -12,7 +12,9 @@
             <div v-for="item in recommends">
               <a :href="item.linkUrl">
                 <!--监听onload方法 scroll组件刷新时机很重要-->
-                <img @load="loadImage" :src="item.picUrl">
+                <img @load="loadImage" :src="item.picUrl" class="needsclick">
+                <!--slider和recommend列表套在一个scroll组件里 click初始化为true(这个点击事件是必须要派发的 因为discList是可以被点击的) 与fastclick冲突-->
+                <!--为img配置needsclick属性 fastclick监听到 就不会手动拦截点击-->
               </a>
             </div>
             <!--slot插槽内容结束-->
@@ -24,7 +26,8 @@
           <ul>
             <li v-for="item in discList" class="item">
               <div class="icon">
-                <img width="60" height="60" :src="item.imgurl">
+                <img width="60" height="60" v-lazy="item.imgurl">
+                <!--先加载默认炸鸡图片(from memory cache) 再加载真实图片(from disk cache)-->
               </div>
               <div class="text">
                 <!--涉及到字符实体,需要转义-->
