@@ -38,6 +38,9 @@
           </ul>
         </div>
       </div>
+      <div class="loading-container" v-if="!discList.length">
+        <loading></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -47,6 +50,7 @@
   import {ERR_OK} from 'api/config'
   import Slider from 'base/slider/slider'
   import Scroll from 'base/scroll/scroll'
+  import Loading from 'base/loading/loading'
 
   export default {
     data () {
@@ -60,9 +64,12 @@
         // 监听discList 刷新scroll组件的时候 2组数据已经就位 DOM也已撑开 所以高度计算不会出错
         // 一旦获取recommends产生了延时 延后于监听discList带来的refresh slider的高度就不会被计算到scroll组件内 就滑不到最后
         this._getRecommend() // 这是一个异步过程 因为获取真实数据 所以有几秒延时
-      }, 50)
+      }, 10)
 
-      this._getDiscList() // 真实网络环境下你并不知道recommends和discList哪个先获取到
+      setTimeout(() => {
+        this._getDiscList()
+      }, 1000)
+      // 真实网络环境下你并不知道recommends和discList哪个先获取到
       // 将2个数据合并成一个数据来监听是一个解决方案,但要注意即使获取到了recommends 里面的url还是要发起图片请求 请求图片的过程依然是异步过程
       // slider的高度完全依赖图片撑开 所以还是可能计算不对
     },
@@ -91,7 +98,8 @@
     },
     components: {
       Slider,
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>
@@ -141,8 +149,8 @@
             .desc
               color: $color-text-d
       .loading-container
-        //position: absolute
-        //width: 100%
-        //top: 50%
-        //transform: translateY(-50%)
+        position: absolute
+        width: 100%
+        top: 50%
+        transform: translateY(-50%)
 </style>
