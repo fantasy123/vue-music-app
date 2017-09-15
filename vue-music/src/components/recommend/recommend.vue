@@ -60,16 +60,11 @@
       }
     },
     created() { // 这个钩子获取数据
-      setTimeout(() => {  // scroll组件包裹了2个元素 都有数据要获取 之前只监听discList没出问题是因为recommends优先于discList获取
-        // 监听discList 刷新scroll组件的时候 2组数据已经就位 DOM也已撑开 所以高度计算不会出错
-        // 一旦获取recommends产生了延时 延后于监听discList带来的refresh slider的高度就不会被计算到scroll组件内 就滑不到最后
-        this._getRecommend() // 这是一个异步过程 因为获取真实数据 所以有几秒延时
-      }, 10)
-
-      setTimeout(() => {
-        this._getDiscList()
-      }, 1000)
-      // 真实网络环境下你并不知道recommends和discList哪个先获取到
+      this._getRecommend()  // scroll组件包裹了2个元素 都有数据要获取 之前只监听discList没出问题是因为recommends优先于discList获取
+      // 监听discList 刷新scroll组件的时候 2组数据已经就位 DOM也已撑开 所以高度计算不会出错
+      // 一旦获取recommends产生了延时 延后于监听discList带来的refresh slider的高度就不会被计算到scroll组件内 就滑不到最后
+      // 这是一个异步过程 因为获取真实数据 所以有几秒延时
+      this._getDiscList() // 真实网络环境下你并不知道recommends和discList哪个先获取到
       // 将2个数据合并成一个数据来监听是一个解决方案,但要注意即使获取到了recommends 里面的url还是要发起图片请求 请求图片的过程依然是异步过程
       // slider的高度完全依赖图片撑开 所以还是可能计算不对
     },
