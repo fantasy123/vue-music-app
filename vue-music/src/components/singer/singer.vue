@@ -53,12 +53,12 @@
               title: key,  // 标题是首字母
               items: []
             }
-
-            map[key].items.push(new Singer({
-              id: item.Fsinger_mid,
-              name: item.Fsinger_name
-            }))
           }
+
+          map[key].items.push(new Singer({
+            id: item.Fsinger_mid,
+            name: item.Fsinger_name
+          }))
         })
         // map的热门部分和字母部分已构造好 Vue可以使用v-for指令遍历对象 但对象是无序的 字母未排序
 
@@ -74,11 +74,11 @@
           } else if (value.title.match(/[a-zA-Z]/)) {
             ret.push(value)
           }
-
-          ret.sort((a, b) => {  // 按字母升序
-            return a.title.charCodeAt(0) - b.title.charCodeAt(0)
-          })
         }
+
+        ret.sort((a, b) => {  // 按字母升序
+          return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+        })
 
         return hot.concat(ret)  // 最终得到一个一维数组 里面包含title(字符串) items(一维数组)
       }
