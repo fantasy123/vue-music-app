@@ -19,6 +19,10 @@
         type: Boolean,
         default: true
       },
+      listenScroll: { // 是否监听滚动事件由外部调用者决定
+        type: Boolean,
+        default: false  // 不需要左右联动的scroll组件无需监听scroll事件 所以默认为false
+      },
       data: { // 为防止数据变化出现无法滚动的情况 scroll组件需要实时监听父组件数据的变化
         // 刷新这个行为应写在scroll组件里而不是引用它的地方
         type: Array,
@@ -40,6 +44,15 @@
           probeType: this.probeType,
           click: this.click
         })
+
+        if (this.listenScroll) {  // 格式通讯录这个属性置为true 派发scroll事件 把滚动位置传出去
+          let me = this // 保存Vue实例 防止进入on("scroll")内部this指向偏移
+
+          this.scroll.on('scroll', (pos) => {
+            me.$emit('scroll', pos) // 内部的this默认为this.scroll本身 而我们需要的是Vue实例
+            // 在外部监听scroll事件拿到位置对象(包含x和y周坐标属性)
+          })
+        }
       },
       // 以下代理一些better-scroll的原生方法(二次封装)
       enable () {  // 启用 better-scroll, 默认 开启

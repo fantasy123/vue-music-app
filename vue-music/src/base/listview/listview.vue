@@ -1,6 +1,12 @@
 <template>
   <!--scroll组件监听listview组件的数据 内部刷新-->
-  <scroll class="listview" :data="data" ref="listview">
+  <scroll class="listview"
+          :data="data"
+          ref="listview"
+          :listenScroll="listenScroll"
+          :probeType="probeType"
+          @scroll="scroll">
+    <!--把值为true的listenScroll传给子组件scroll 使它派发scroll事件 抛出滚动位置对象-->
     <ul>
       <!--接收Singer组件传下来的data渲染自身并传给scroll重新计算高度-->
       <li v-for="group in data" class="list-group" ref="listGroup">
@@ -19,7 +25,10 @@
     <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.prevent.stop="onShortcutTouchMove">
       <!--阻止冒泡 阻止浏览器原生滚动-->
       <ul>
-        <li v-for="(item, index) in shortcutList" class="item" :data-index="index">{{item}}</li>
+        <li v-for="(item, index) in shortcutList"
+            class="item"
+            :data-index="index"
+            :class="{'current' : currentIndex === index}">{{item}}</li>
         <!--扩展一个属性-->
       </ul>
     </div>
@@ -33,16 +42,25 @@
   const ANCHOR_HEIGHT = 18  // 锚点高度
 
   export default {
-    created() {
-      this.touch = {} // 需要在触摸事件开始和移动的过程中共享坐标
-      // touch负责存储坐标值 不需要时刻监听
-      // 没有放在props或data或computed里面是因为vue会给这3个hook里的数据设置getter和setter以实现双向绑定
-    },
     props: {
       data: { // Singer组件异步获取singers并格式化 再通过props传入
         type: Array,
         default: []
       }
+    },
+    data() {
+      return {
+        scrollY: -1, // 观测实时滚动的位置 落在哪个区间
+        currentIndex: 0 // 决定哪一个group高亮 默认第一块(热门高亮)
+      }
+    },
+    created() {
+      this.touch = {} // 需要在触摸事件开始和移动的过程中共享坐标
+      // touch负责存储坐标值 不需要时刻监听
+      // 没有放在props或data或computed里面是因为vue会给这3个hook里的数据设置getter和setter以实现双向绑定
+      this.listenScroll = true  // 传给scroll组件
+      this.listHeight = []  // group高度数组 也不需要实时监听 data确定后这个数据也确定了
+      this.probeType = 3  // 传给scroll组件的props 使得滚动事件的时候不截流 实时监控
     },
     computed: {
       shortcutList() {
@@ -59,15 +77,54 @@
         this.touch.anchorIndex = anchorIndex  // 记录刚开始点击的锚点索引
         this._scrollTo(anchorIndex)
       },
-      onShortcutTouchMove(e) {
+      onShortcutTouchMove(e) {  // 公共方法或绑定事件的方法放上面
         let firstTouch = e.touches[0]
         this.touch.y2 = firstTouch.pageY
         let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0 // y轴上偏移的锚点个数 或0与向下取整等效
-        let anchorIndex = this.touches.anchorIndex + delta  // 获得移动的时候的锚点索引
+        let anchorIndex = parseInt(this.touch.anchorIndex) + delta  // 获得移动的时候的锚点索引
+        // getData获得的是一个内容为index的字符串 要转化为数字才能与delta相加
         this._scrollTo(anchorIndex)
       },
-      _scrollTo(index) {
-        this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
+      scroll(pos) {  // 响应scroll组件派发的scroll事件
+        this.scrollY = pos.y  // better-scroll派发scroll事件 listview组件响应scroll事件 scrollY等于BS滚动的y值距离
+      },
+      _scrollTo(index) {  // 私有方法放下面
+        this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // 第二个参数是缓动动画的动画时间 不需要滚动动画(瞬移)
+      },
+      _calculateHeight() {  // 计算每个group的高度
+        this.listHeight = []
+        const list = this.$refs.listGroup // 获取group列表
+        let height = 0  // 第一个区块 热门区块 高度为0
+        this.listHeight.push(height)  // 将第一个区块所在的高度值推入listHeight数组
+
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i]  // 每个group元素
+
+          height += item.clientHeight
+          this.listHeight.push(height)  // 得到高度不断累加的高度列表 供scrollY比对定位
+        }
+      }
+    },
+    watch: {
+      data() {  // 监听歌手数据的变化 数据变化了 每块歌手的累计高度都要重新算
+        setTimeout(() => {
+          this._calculateHeight() // DOM渲染完毕 重新计算每个group的高度
+        }, 20)  // 数据变化到DOM变化有延时
+      },
+      scrollY(newY) { // 观测滚动纵坐标的变化(scroll组件里的手指滑动驱动) 跟listHeight作对比 确定落在第几个区间 从而得到currentIndex
+        const listHeight = this.listHeight // 累计高度数组
+
+        for (let i = 0; i < listHeight.length; i++) {
+          let height1 = listHeight[i]  // 下限
+          let height2 = listHeight[i + 1]  // 上限
+
+          if (!height2 || (-newY >= height1 && -newY <= height2)) { // 滚动到底部或者Y值介于i和i+1两者的高度之间
+            this.currentIndex = i
+            return  // 跳出循环
+          }
+
+          this.currentIndex = 0 // 在顶部
+        }
       }
     },
     components: {
