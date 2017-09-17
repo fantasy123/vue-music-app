@@ -1,11 +1,15 @@
 <template>
-  <div class="singer"></div>
+  <div class="singer">
+    <list-view :data="singers"></list-view>
+    <!--ListView(JS)对应list-view(html里)  Listview对应listview-->
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {getSingerList} from 'api/singer'
   import {ERR_OK} from 'api/config'
   import Singer from 'common/js/singer'
+  import ListView from 'base/listview/listview'
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LIST_LEN = 10
@@ -23,8 +27,7 @@
       _getSingerList() {
         getSingerList().then((res) => {
           if (res.code === ERR_OK) {
-            this.singers = res.data.list
-            console.log(this._normalizeSinger(this.singers))  // 在这里输出可以确保singers数据已拿到
+            this.singers = this._normalizeSinger(res.data.list) // 传入处理好的数据结构
           }
         })
       },
@@ -82,6 +85,9 @@
 
         return hot.concat(ret)  // 最终得到一个一维数组 里面包含title(字符串) items(一维数组)
       }
+    },
+    components: {
+      ListView
     }
   }
 </script>
