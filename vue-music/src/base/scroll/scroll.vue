@@ -50,6 +50,13 @@
       },
       refresh () {
         this.scroll && this.scroll.refresh()
+      },
+      scrollTo() {
+        this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments) // 用apply是为了借助arguments关键字把外部的代理函数的参数传
+        // 到better-scroll原生方法上
+      },
+      scrollToElement() {
+        this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
       }
     },
     watch: {
