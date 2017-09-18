@@ -23,7 +23,8 @@
     </ul>
     <!--快速入口就是title列表-->
     <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.prevent.stop="onShortcutTouchMove">
-      <!--阻止冒泡 阻止浏览器原生滚动-->
+      <!--阻止冒泡 阻止浏览器原生滚动  触摸和点击事件是绑定在整个list-shortcut上的-->
+      <!--我们点击没有字母的黑色边缘的时候也会调用_scrollTo() 来做滚动和获取索引的操作 事实上没有任何意义-->
       <ul>
         <li v-for="(item, index) in shortcutList"
             class="item"
@@ -89,6 +90,22 @@
         this.scrollY = pos.y  // better-scroll派发scroll事件 listview组件响应scroll事件 scrollY等于BS滚动的y值距离
       },
       _scrollTo(index) {  // 私有方法放下面
+        // 点击黑色边缘区域会调用getData(el,index) 这里显然没有data-index属性 所以会获得一个null
+        if (!index && index !== 0) {  // 针对index === null的情况 排除掉index为0 因为index为0的时候是有效的
+          return  // 不进行滚动和设置scrollY的操作
+        }
+
+        // 边界处理
+        if (index < 0) {
+          index = 0
+        } else if (index > this.listHeight.length - 2) {
+          index = this.listHeight.length - 2
+        }
+
+        // 虽然调用了better-scroll的滚动事件 但是监听不到scrollY的变化 而currentIndex的更新就是通过监听scrollY并和listHeight的比对得到的
+        // 滚动左侧歌手列表的时候会派发scroll事件 响应scroll事件的时候就会把pos.y不断赋值给scrollY改变它的值 从而进行下面的高亮逻辑
+        this.scrollY = -this.listHeight[index] // 需要手动设置scrollY 不断更新它的值 (拿到的是上限)
+        // 这个_scrollTo事件被touchstart事件和touchmove事件同时调用 可以实时更新scrollY 从而获取当前索引并高亮
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // 第二个参数是缓动动画的动画时间 不需要滚动动画(瞬移)
       },
       _calculateHeight() {  // 计算每个group的高度
