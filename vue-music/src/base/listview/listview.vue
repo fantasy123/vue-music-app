@@ -114,17 +114,28 @@
       scrollY(newY) { // 观测滚动纵坐标的变化(scroll组件里的手指滑动驱动) 跟listHeight作对比 确定落在第几个区间 从而得到currentIndex
         const listHeight = this.listHeight // 累计高度数组
 
-        for (let i = 0; i < listHeight.length; i++) {
+        // 滚动到顶部
+        if (newY > 0) {
+          this.currentIndex = 0 // 热门区块高亮
+          return
+        }
+
+        // 在中间部分滚动
+        for (let i = 0; i < listHeight.length - 1; i++) { // 每个区块有上下限 所以高度数比区块数多一
           let height1 = listHeight[i]  // 下限
           let height2 = listHeight[i + 1]  // 上限
 
-          if (!height2 || (-newY >= height1 && -newY <= height2)) { // 滚动到底部或者Y值介于i和i+1两者的高度之间
+          if (-newY >= height1 && -newY <= height2) { // 滚动到底部或者Y值介于i和i+1两者的高度之间
+            // 所以不存在height2达不到的情况
             this.currentIndex = i
             return  // 跳出循环
           }
 
           this.currentIndex = 0 // 在顶部
         }
+
+        // 滚动到最底部且-newY大于最后一个元素的上限
+        this.currentIndex = listHeight.length - 2  // 高度列表比区块数大1
       }
     },
     components: {
