@@ -2,6 +2,8 @@
   <div class="singer">
     <list-view :data="singers"></list-view>
     <!--ListView(JS)对应list-view(html里)  Listview对应listview-->
+    <router-view></router-view>
+    <!--承载子路由 歌手详情页-->
   </div>
 </template>
 

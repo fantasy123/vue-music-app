@@ -4,6 +4,7 @@ import Rank from 'components/rank/rank'
 import Recommend from 'components/recommend/recommend'
 import Search from 'components/search/search'
 import Singer from 'components/singer/singer'
+import SingerDetail from 'components/singer-detail/singer-detail'
 
 Vue.use(Router) // 注册路由
 
@@ -27,7 +28,13 @@ export default new Router({ // 暴露一个Router的实例
     },
     {
       path: '/singer',
-      component: Singer
+      component: Singer,
+      children: [ // 子路由
+        {
+          path: ':id',  // 根据id确定特定的歌手详情页
+          component: SingerDetail
+        }
+      ]
     }
   ]
 })
