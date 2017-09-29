@@ -33,6 +33,12 @@
         <!--扩展一个属性-->
       </ul>
     </div>
+    <div class="list-fixed">
+      <!--显示当前group的悬浮块-->
+      <h1 class="fixed-title">{{fixedTitle}}</h1>
+      <!--向下拖动 fixedTitle置空 v-show为false 悬浮块消失-->
+      <!--标题根据currentIndex计算而来-->
+    </div>
   </scroll>
 </template>
 
@@ -68,6 +74,9 @@
         return this.data.map((group) => {
           return group.title.substr(0, 1) // 得到首字母列表 '热门'截取第一个字
         })
+      },
+      fixedTitle() {
+        return this.data[this.currentIndex].title
       }
     },
     methods: {
@@ -210,17 +219,17 @@
         &.current
           color: $color-theme
     .list-fixed
-      //position: absolute
-      //top: 0
-      //left: 0
-      //width: 100%
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
       .fixed-title
-        //height: 30px
-        //line-height: 30px
-        //padding-left: 20px
-        //font-size: $font-size-small
-        //color: $color-text-l
-        //background: $color-highlight-background
+        height: 30px
+        line-height: 30px
+        padding-left: 20px
+        font-size: $font-size-small
+        color: $color-text-l
+        background: $color-highlight-background
     .loading-container
       //position: absolute
       //width: 100%
