@@ -39,12 +39,16 @@
       <!--向下拖动 fixedTitle置空 v-show为false 悬浮块消失-->
       <!--标题根据currentIndex计算而来-->
     </div>
+    <div class="loading-container" v-show="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll' // 通讯录基于scroll组件
   import {getData} from 'common/js/dom'
+  import Loading from 'base/loading/loading'
 
   const ANCHOR_HEIGHT = 18  // 锚点高度
 
@@ -165,7 +169,8 @@
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>
@@ -231,8 +236,8 @@
         color: $color-text-l
         background: $color-highlight-background
     .loading-container
-      //position: absolute
-      //width: 100%
-      //top: 50%
-      //transform: translateY(-50%)
+      position: absolute
+      width: 100%
+      top: 50%
+      transform: translateY(-50%)
 </style>
