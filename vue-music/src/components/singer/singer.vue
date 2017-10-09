@@ -1,9 +1,11 @@
 <template>
   <div class="singer">
-    <list-view :data="singers"></list-view>
+    <!--监听listview组件派发的select事件,写回调-->
+    <list-view :data="singers" @select="selectSinger"></list-view>
     <!--ListView(JS)对应list-view(html里)  Listview对应listview-->
     <router-view></router-view>
-    <!--承载子路由 歌手详情页-->
+    <!--承载子路由 歌手详情页(默认隐藏) 点击列表元素时根据id跳转到对应子路由-->
+    <!--路由不是新页面 只是一个层 通过盖住现有层 表现出一个新页面-->
   </div>
 </template>
 
@@ -26,10 +28,16 @@
       this._getSingerList()
     },
     methods: {
+      selectSinger(singer) {  // 接收一个singer的实例
+        // 跳转路由
+        this.$router.push({
+          path: `/singer/${singer.id}`  // 根据当前歌手实例的id属性来跳转
+        })
+      },
       _getSingerList() {
         getSingerList().then((res) => {
           if (res.code === ERR_OK) {
-            this.singers = this._normalizeSinger(res.data.list) // 传入处理好的数据结构
+            this.singers = this._normalizeSinger(res.data.list) // 传入处理好的数据结构(一堆singer的实例)
           }
         })
       },

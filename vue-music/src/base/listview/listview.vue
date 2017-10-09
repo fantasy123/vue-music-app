@@ -12,7 +12,8 @@
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="item in group.items" class="list-group-item">
+          <!--歌手列表基于listview实现 所以点击跳转到歌手详情页的时候要在基础组件上加点击事件-->
+          <li @click="selectItem(item)" v-for="item in group.items" class="list-group-item">
             <!--new Singer那个类构造出的新数据结构-->
             <img v-lazy="item.avatar" class="avatar">
             <!--在main.js里注册过vue-lazy-load这个插件 所以可以直接使用-->
@@ -84,6 +85,10 @@
       }
     },
     methods: {
+      selectItem(item) { // 负责将事件派发出去给调用它的组件 不涉及任何业务逻辑
+        // item作为参数传递出去 让调用它的组件知道点击了哪个元素
+        this.$emit('select', item)
+      },
       onShortcutTouchStart(e) { // e拿不到index属性 所以给元素附加一个data-index属性(里面保存index) 以供获取
         let anchorIndex = getData(e.target, 'index')  // 第三个参数不传就是get 传了就是set 间接拿到了锚点索引
         let firstTouch = e.touches[0]
