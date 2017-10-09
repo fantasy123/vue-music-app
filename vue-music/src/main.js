@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App' // 引入根组件
 import fastclick from 'fastclick'
 import router from './router' // 引入router实例
+import store from './store'
 import VueLazyLoad from 'vue-lazyload'  // 只加载首屏图片 其余图片要滚动到它才加载 节省流量 提升加载速度
 
 import 'common/stylus/index.styl' // 没配置common的别名的话会尝试从node_modules里去找 让你去"安装" 它并不是node里的模块
@@ -23,5 +24,6 @@ new Vue({
   //   return h(App);
   // }
   // 升级1.0的写法   html中也不用写<app></app>标签
-  router  // router实例传到Vue对象上 然后在app.vue上写跳转
+  router,  // router实例传到Vue对象上 然后在app.vue上写跳转
+  store // 将store注入到vue
 })

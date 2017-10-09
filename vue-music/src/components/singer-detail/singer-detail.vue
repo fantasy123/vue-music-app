@@ -6,7 +6,18 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {mapGetters} from 'vuex' // 取数据语法糖
 
+  export default {
+    computed: { // 扩展到计算属性里
+      ...mapGetters([ // 数组
+        'singer'  // 对应getters里的singer 组件级全局变量
+      ])
+    },
+    created() {
+      console.log(this.singer)  // 通过vuex解决路由之间数据传递的问题
+    }
+  }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">

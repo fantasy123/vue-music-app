@@ -14,6 +14,8 @@
   import {ERR_OK} from 'api/config'
   import Singer from 'common/js/singer'
   import ListView from 'base/listview/listview'
+  // vuex提供的语法糖(节省代码量)  改变state
+  import {mapMutations} from 'vuex' // 对mutation进行一次封装
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LIST_LEN = 10
@@ -33,6 +35,9 @@
         this.$router.push({
           path: `/singer/${singer.id}`  // 根据当前歌手实例的id属性来跳转
         })
+
+        this.setSinger(singer)  // 传入payload 实现一个mutation的提交 修改了state state的singer属性就有值了 这里写进去 singer-detail取下来
+        // 调用setSinger 相当于执行了字符串常量 相当于调用了types.SET_SINGER
       },
       _getSingerList() {
         getSingerList().then((res) => {
@@ -94,7 +99,10 @@
         })
 
         return hot.concat(ret)  // 最终得到一个一维数组 里面包含title(字符串) items(一维数组)
-      }
+      },
+      ...mapMutations({ // 扩展运算符
+        setSinger: 'SET_SINGER' // 对mutation的修改映射成一个方法名 对应的是mutation-types里的常量
+      })
     },
     components: {
       ListView
