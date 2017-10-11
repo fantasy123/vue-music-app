@@ -66,10 +66,23 @@
     },
     watch: {
       scrollY(newY) { // 监听scrollY的变化 设置layer层的偏移量
+        let zIndex = 0  // 初始化背景图的层级
         let translateY = Math.max(this.minTranslateY, newY) // 未超过这个值 用newY 实时更新
         // 超过了则定死在minTranslateY(bgLayer到顶不再动,完全覆盖歌手图,列表元素还是可以滚动)
         this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
         this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`
+
+        if (newY < this.minTranslateY) {  // 滚到顶部
+          zIndex = 10 // 背景图盖过列表项 产生overflow hidden的效果
+          this.$refs.bgImage.style.paddingTop = 0 // 清除padding-top 70%
+          this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px` // 背景图高度设为保留高度 如果是原高度会盖住一部分列表项
+        } else {  // 未滚动到顶部 重置
+          this.$refs.bgImage.style.paddingTop = '70%'
+          this.$refs.bgImage.style.height = 0
+        }
+
+        this.$refs.bgImage.style.zIndex = zIndex  // 今日第一个分支 则为10 未进入 则为初始值0
+        // 临界值时bgImage的样式有突变 但是表现一致
       }
     },
     components: {
