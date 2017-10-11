@@ -8,7 +8,9 @@
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="filter"></div>
     </div>
-    <scroll :data="songs" class="list" ref="list">
+    <div class="bg-layer" ref="layer"></div>
+    <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
+      <!--需要实时监听滚动组件的位置-->
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
       </div>
@@ -19,6 +21,8 @@
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
+
+  const RESERVED_HEIGHT = 40  // 预留高度
 
   export default {
     props: {
@@ -35,14 +39,38 @@
         default: []
       }
     },
+    data() {
+      return {
+        scrollY: 0  // 维护一个纵向滚动位置变量
+      }
+    },
+    created() {
+      this.probeType = 3  // 传给scroll组件 使其支持滚动监听
+      this.listenScroll = true
+    },
     computed: {
       bgStyle() {
         return `background-image:url(${this.bgImage})`
       }
     },
+    methods: {
+      scroll(pos) { // 参数是position对象
+        this.scrollY = pos.y  // 实时给scrollY赋值
+      }
+    },
     mounted() {
+      this.imageHeight = this.$refs.bgImage.clientHeight  // 屏幕大小定的情况下 这个值不变 在这里缓存起来 就不用每次去访问DOM
+      this.minTranslateY = -this.imageHeight + RESERVED_HEIGHT
       // 使歌曲列表避开头部背景图 因为不同视口背景图高度不同(70%) 所以需要动态设置
-      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px` // 前者是组件 需要$el才能使用原生DOM属性 后者是原生DOM
+      this.$refs.list.$el.style.top = `${this.imageHeight}px` // 前者是组件 需要$el才能使用原生DOM属性 后者是原生DOM
+    },
+    watch: {
+      scrollY(newY) { // 监听scrollY的变化 设置layer层的偏移量
+        let translateY = Math.max(this.minTranslateY, newY) // 未超过这个值 用newY 实时更新
+        // 超过了则定死在minTranslateY(bgLayer到顶不再动,完全覆盖歌手图,列表元素还是可以滚动)
+        this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
+        this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`
+      }
     },
     components: {
       Scroll,
@@ -122,17 +150,16 @@
         width: 100%
         height: 100%
         background: rgba(7,17,27,0.4)
-   // .bg-layer
-    //  position: relative
-    //  height: 100%
-    //  background: $color-background
+    .bg-layer
+      position: relative
+      height: 100%
+      background: $color-background
     .list  // 滚动的歌曲列表
       position: fixed
       top: 0
       bottom: 0
       width: 100%
       background: $color-background
-      overflow: hidden
       .song-list-wrapper  // 里面包含song-list组件
         padding: 20px 30px
     //  .loading-container
