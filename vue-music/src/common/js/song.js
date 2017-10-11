@@ -24,7 +24,7 @@ export function createSong (musicData) {
     album: musicData.albumname,
     duration: musicData.interval,
     image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
-    url: `https://thirdparty.gtimg.com/${musicData.songid}.m4a?fromtag=38`  // 其中一个播放源 后面带query
+    url: `http://ws.stream.qqmusic.com/${musicData.songid}.m4a?fromtag=46`  // 其中一个播放源 后面带query
   })
 }
 
