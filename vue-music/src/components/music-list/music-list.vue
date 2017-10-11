@@ -5,13 +5,21 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <!--是singer实例里的singer.name-->
-    <div class="bg-image" :style="bgStyle">
+    <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="filter"></div>
     </div>
+    <scroll :data="songs" class="list" ref="list">
+      <div class="song-list-wrapper">
+        <song-list :songs="songs"></song-list>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import Scroll from 'base/scroll/scroll'
+  import SongList from 'base/song-list/song-list'
+
   export default {
     props: {
       bgImage: {
@@ -31,6 +39,14 @@
       bgStyle() {
         return `background-image:url(${this.bgImage})`
       }
+    },
+    mounted() {
+      // 使歌曲列表避开头部背景图 因为不同视口背景图高度不同(70%) 所以需要动态设置
+      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px` // 前者是组件 需要$el才能使用原生DOM属性 后者是原生DOM
+    },
+    components: {
+      Scroll,
+      SongList
     }
   }
 </script>
@@ -72,7 +88,7 @@
       position: relative
       width: 100%
       height: 0
-      padding-top: 70%
+      padding-top: 70%  // 宽高比为10:7 占位
       transform-origin: top
       background-size: cover
     //  .play-wrapper
@@ -99,25 +115,26 @@
         //    display: inline-block
         //    vertical-align: middle
         //    font-size: $font-size-small
-     // .filter
-     //   position: absolute
-     //   top: 0
-     //   left: 0
-     //   width: 100%
-      //  height: 100%
-      //  background: rgba(7,17,27,0.4)
+      .filter // 蒙层
+        position: absolute  // 相对于bgImage绝对定位 铺满
+        top: 0
+        left: 0
+        width: 100%
+        height: 100%
+        background: rgba(7,17,27,0.4)
    // .bg-layer
     //  position: relative
     //  height: 100%
     //  background: $color-background
-  //  .list
-    //  position: fixed
-    //  top: 0
-    //  bottom: 0
-    //  width: 100%
-     // background: $color-background
-    //  .song-list-wrapper
-     //   padding: 20px 30px
+    .list  // 滚动的歌曲列表
+      position: fixed
+      top: 0
+      bottom: 0
+      width: 100%
+      background: $color-background
+      overflow: hidden
+      .song-list-wrapper  // 里面包含song-list组件
+        padding: 20px 30px
     //  .loading-container
        // position: absolute
        // width: 100%
