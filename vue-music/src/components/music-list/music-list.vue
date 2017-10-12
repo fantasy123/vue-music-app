@@ -21,8 +21,12 @@
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
+  import {prefixStyle} from 'common/js/dom' // 根据浏览器支持情况得到相应的CSS样式 不需要去写多余的
 
   const RESERVED_HEIGHT = 40  // 预留高度
+
+  const transform = prefixStyle('transform')
+  const backdrop = prefixStyle('backdrop-filter') // 根据浏览器能力拼接好的样式存在变量里
 
   export default {
     props: {
@@ -73,8 +77,7 @@
         let translateY = Math.max(this.minTranslateY, newY) // 未超过这个值 用newY 实时更新
 
         // 超过了则定死在minTranslateY(bgLayer到顶不再动,完全覆盖歌手图,列表元素还是可以滚动)
-        this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
-        this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`
+        this.$refs.layer.style[transform] = `translate3d(0,${translateY}px,0)`
 
         if (newY > 0) { // 向下拉
           scale = 1 + percent // imageHeight * scale = imageHeight + imageHeight * percent = imageHeight + newY
@@ -83,8 +86,7 @@
           blur = Math.min(20 * percent, 20) // 小于20时 应用0-20的模糊 大于20时 设定为20 模糊有一个限度
         }
 
-        this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)`  // 注意单位
-        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur}px)`
+        this.$refs.filter.style[backdrop] = `blur(${blur}px)`  // 注意单位
 
         if (newY < this.minTranslateY) {  // 滚到顶部
           zIndex = 10 // 背景图盖过列表项 产生overflow hidden的效果
@@ -98,8 +100,7 @@
         this.$refs.bgImage.style.zIndex = zIndex  // 今日第一个分支 则为10 未进入 则为初始值0
         // 临界值时bgImage的样式有突变 但是表现一致
 
-        this.$refs.bgImage.style['transform'] = `scale(${scale})` // 通过缩放,图片高度增加了newY , 与滚动无缝贴合
-        this.$refs.bgImage.style['webkitTransform'] = `scale(${scale})`
+        this.$refs.bgImage.style[transform] = `scale(${scale})` // 通过缩放,图片高度增加了newY , 与滚动无缝贴合
       }
     },
     components: {
