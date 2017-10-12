@@ -30,12 +30,11 @@ export function getData (el, name, val) {
   }
 }
 
-// 封装一个auto-prefixer的逻辑(利用浏览器能力检测特性)
-let eleStyle = document.createElement('div').style
+let elementStyle = document.createElement('div').style
 
-let vendor = (() => { // 调用供应商
+let vendor = (() => {
   let transformNames = {
-    webkit: 'webkitTransform',  // 以transform作引确定供应商 再拼接到其他需要加前缀的属性上 如:backdrop 当然也可以拼到transform上
+    webkit: 'webkitTransform',
     Moz: 'MozTransform',
     O: 'OTransform',
     ms: 'msTransform',
@@ -43,20 +42,22 @@ let vendor = (() => { // 调用供应商
   }
 
   for (let key in transformNames) {
-    if (eleStyle[transformNames[key] !== undefined]) {  // 看eleStyle支持哪些CSS特性
-      return key // 返回供应商
+    if (elementStyle[transformNames[key]] !== undefined) {
+      return key
     }
   }
 
-  return false  // 任何一个供应商都不支持
-})()  // 立即执行函数
+  return false
+})()
 
-export function prefixStyle (style) { // 以上是拿transform作能力检测 确定供应商
-  if (vendor === false) { // 无符合要求的供应商
+export function prefixStyle(style) {
+  if (vendor === false) {
     return false
-  } else if (vendor === 'standard') { // 标准属性
-    return style  // 这个CSS样式只有标准的,不需要供应商
-  } else {
-    return vendor + style.charAt(0).toUpperCase() + style.substr(1)
   }
+
+  if (vendor === 'standard') {
+    return style
+  }
+
+  return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }

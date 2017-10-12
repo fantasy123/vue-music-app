@@ -1,11 +1,18 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back" @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
     <!--是singer实例里的singer.name-->
     <div class="bg-image" :style="bgStyle" ref="bgImage">
+      <div class="play-wrapper">
+        <div class="play" v-show="songs.length>0" ref="playBtn">
+          <!--数据加载完之后才显示随机播放全部按钮-->
+          <i class="icon-play"></i>
+          <span class="text">随机播放全部</span>
+        </div>
+      </div>
       <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer"></div>
@@ -14,6 +21,9 @@
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
       </div>
+      <div class="loading-container" v-show="!songs.length">
+        <loading></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -21,6 +31,7 @@
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
+  import Loading from 'base/loading/loading'
   import {prefixStyle} from 'common/js/dom' // 根据浏览器支持情况得到相应的CSS样式 不需要去写多余的
 
   const RESERVED_HEIGHT = 40  // 预留高度
@@ -60,6 +71,9 @@
     methods: {
       scroll(pos) { // 参数是position对象
         this.scrollY = pos.y  // 实时给scrollY赋值
+      },
+      back() {
+        this.$router.back()
       }
     },
     mounted() {
@@ -92,9 +106,11 @@
           zIndex = 10 // 背景图盖过列表项 产生overflow hidden的效果
           this.$refs.bgImage.style.paddingTop = 0 // 清除padding-top 70%
           this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px` // 背景图高度设为保留高度 如果是原高度会盖住一部分列表项
+          this.$refs.playBtn.style.display = 'none' // 隐藏播放按钮(因为在顶部 背景图高度设为保留高度 而按钮是根据背景图底部绝对定位)
         } else {  // 未滚动到顶部 重置
           this.$refs.bgImage.style.paddingTop = '70%'
           this.$refs.bgImage.style.height = 0
+          this.$refs.playBtn.style.display = '' // 不置none就显示
         }
 
         this.$refs.bgImage.style.zIndex = zIndex  // 今日第一个分支 则为10 未进入 则为初始值0
@@ -105,7 +121,8 @@
     },
     components: {
       Scroll,
-      SongList
+      SongList,
+      Loading
     }
   }
 </script>
@@ -150,30 +167,30 @@
       padding-top: 70%  // 宽高比为10:7 占位
       transform-origin: top // 以顶部为中心开始放大
       background-size: cover
-    //  .play-wrapper
-    //    position: absolute
-    //    bottom: 20px
-     //   z-index: 50
-     //   width: 100%
-     //   .play
-      //    box-sizing: border-box
-      //    width: 135px
-      //    padding: 7px 0
-      //    margin: 0 auto
-      //    text-align: center
-      //    border: 1px solid $color-theme
-      //    color: $color-theme
-      //    border-radius: 100px
-      //    font-size: 0
-      //    .icon-play
-        //    display: inline-block
-        //    vertical-align: middle
-        //    margin-right: 6px
-        //    font-size: $font-size-medium-x
-        //  .text
-        //    display: inline-block
-        //    vertical-align: middle
-        //    font-size: $font-size-small
+      .play-wrapper
+        position: absolute
+        bottom: 20px
+        z-index: 50 // 要比10filter层级高
+        width: 100%
+        .play
+          box-sizing: border-box
+          width: 135px
+          padding: 7px 0
+          margin: 0 auto
+          text-align: center
+          border: 1px solid $color-theme
+          color: $color-theme
+          border-radius: 100px
+          font-size: 0
+          .icon-play
+            display: inline-block
+            vertical-align: middle
+            font-size: $font-size-medium-x
+            margin-right: 6px
+          .text
+            display: inline-block
+            vertical-align: middle
+            font-size: $font-size-small
       .filter // 蒙层
         position: absolute  // 相对于bgImage绝对定位 铺满
         top: 0
@@ -193,9 +210,9 @@
       background: $color-background
       .song-list-wrapper  // 里面包含song-list组件
         padding: 20px 30px
-    //  .loading-container
-       // position: absolute
-       // width: 100%
-       // top: 50%
-      //  transform: translateY(-50%)
+      .loading-container
+        position: absolute
+        width: 100%
+        top: 50%
+        transform: translateY(-50%)
 </style>
