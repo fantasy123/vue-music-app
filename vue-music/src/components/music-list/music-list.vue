@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <!--是singer实例里的singer.name-->
     <div class="bg-image" :style="bgStyle" ref="bgImage">
-      <div class="filter"></div>
+      <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer"></div>
     <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
@@ -65,12 +65,26 @@
       this.$refs.list.$el.style.top = `${this.imageHeight}px` // 前者是组件 需要$el才能使用原生DOM属性 后者是原生DOM
     },
     watch: {
-      scrollY(newY) { // 监听scrollY的变化 设置layer层的偏移量
+      scrollY(newY) { // 监听scrollY的变化 设置layer层的偏移量以及其他联动操作
         let zIndex = 0  // 初始化背景图的层级
+        let scale = 1 // 初始化背景图的缩放比例
+        let percent = Math.abs(newY / this.imageHeight)
+        let blur = 0  // 初始化背景图蒙层的高斯模糊
         let translateY = Math.max(this.minTranslateY, newY) // 未超过这个值 用newY 实时更新
+
         // 超过了则定死在minTranslateY(bgLayer到顶不再动,完全覆盖歌手图,列表元素还是可以滚动)
         this.$refs.layer.style['transform'] = `translate3d(0,${translateY}px,0)`
         this.$refs.layer.style['webkitTransform'] = `translate3d(0,${translateY}px,0)`
+
+        if (newY > 0) { // 向下拉
+          scale = 1 + percent // imageHeight * scale = imageHeight + imageHeight * percent = imageHeight + newY
+          zIndex = 10 // 背景图层级提升到跟歌曲列表到同一层级
+        } else {  // 向上拉
+          blur = Math.min(20 * percent, 20) // 小于20时 应用0-20的模糊 大于20时 设定为20 模糊有一个限度
+        }
+
+        this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)`  // 注意单位
+        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur}px)`
 
         if (newY < this.minTranslateY) {  // 滚到顶部
           zIndex = 10 // 背景图盖过列表项 产生overflow hidden的效果
@@ -83,6 +97,9 @@
 
         this.$refs.bgImage.style.zIndex = zIndex  // 今日第一个分支 则为10 未进入 则为初始值0
         // 临界值时bgImage的样式有突变 但是表现一致
+
+        this.$refs.bgImage.style['transform'] = `scale(${scale})` // 通过缩放,图片高度增加了newY , 与滚动无缝贴合
+        this.$refs.bgImage.style['webkitTransform'] = `scale(${scale})`
       }
     },
     components: {
@@ -130,7 +147,7 @@
       width: 100%
       height: 0
       padding-top: 70%  // 宽高比为10:7 占位
-      transform-origin: top
+      transform-origin: top // 以顶部为中心开始放大
       background-size: cover
     //  .play-wrapper
     //    position: absolute
