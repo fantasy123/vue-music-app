@@ -19,7 +19,9 @@
     <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <!--需要实时监听滚动组件的位置-->
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs" @select="selectItem"></song-list>
+        <!--III 响应select事件-->
+        <!-- 响应song-list组件派发的事件 -->
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -33,6 +35,7 @@
   import SongList from 'base/song-list/song-list'
   import Loading from 'base/loading/loading'
   import {prefixStyle} from 'common/js/dom' // 根据浏览器支持情况得到相应的CSS样式 不需要去写多余的
+  import {mapActions} from 'vuex'
 
   const RESERVED_HEIGHT = 40  // 预留高度
 
@@ -74,7 +77,17 @@
       },
       back() {
         this.$router.back()
-      }
+      },
+//      IV 触发action 提交mutations 修改state
+      selectItem(item, index) { // 设置一些播放状态(全屏,当前索引等) 触发多次mutation 封装成一个action
+        this.selectPlay({
+          list: this.songs, // 传入当前歌曲列表
+          index
+        })
+      },
+      ...mapActions([ // mapGetters写在computed里 得到全局变量 mapMutations和mapActions写在methods里 得到全局方法
+        'selectPlay'  // 对应actions里的selectPlay动作 在这里注册之后可以作为全局方法在这个组件里调用
+      ])
     },
     mounted() {
       this.imageHeight = this.$refs.bgImage.clientHeight  // 屏幕大小定的情况下 这个值不变 在这里缓存起来 就不用每次去访问DOM

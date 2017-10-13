@@ -1,7 +1,8 @@
 <template>
   <div class="song-list">
     <ul>
-      <li v-for="song in songs" class="item">
+      <li v-for="(song,index) in songs" class="item" @click="selectItem(song,index)">
+        <!--I 点击事件-->
         <div class="content">
           <h2 class="name">{{song.name}}</h2>
           <p class="desc">{{getDesc(song)}}</p>
@@ -22,6 +23,10 @@
     methods: {  // filter本质上也是方法
       getDesc(song) {
         return `${song.singer} . ${song.album}` // 描述由歌手列表和专辑名称组成
+      },
+      selectItem(item, index) {
+//        II 派发select事件
+        this.$emit('select', item, index) // 只派发事件 告诉外部组件被点击了 点击了哪个元素 不包含逻辑
       }
     }
   }
