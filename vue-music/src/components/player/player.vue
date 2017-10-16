@@ -1,61 +1,66 @@
 <template>
   <div class="player" v-show="playList.length>0">
-    <!--有歌曲在播放=>显示播放器-->
-    <div class="normal-player" v-show="fullScreen">
-      <!--fullScreen在state里设置为false,则播放器默认收起,mini默认展示-->
-      <div class="background">
-        <img width="100%" height="100%" :src="currentSong.image">
-      </div>
-      <div class="top">
-        <div class="back" @click="back">
-          <i class="icon-back"></i>
+    <transition name="normal">
+      <!--有歌曲在播放=>显示播放器-->
+      <div class="normal-player" v-show="fullScreen">
+        <!--fullScreen在state里设置为false,则播放器默认收起,mini默认展示-->
+        <div class="background">
+          <img width="100%" height="100%" :src="currentSong.image">
         </div>
-        <h1 class="title" v-html="currentSong.name"></h1>
-        <h2 class="subtitle" v-html="currentSong.singer"></h2>
-      </div>
-      <div class="middle">
-        <div class="middle-l">
-          <div class="cd-wrapper">
-            <div class="cd">
-              <img class="image" :src="currentSong.image">
+        <div class="top">
+          <div class="back" @click="back">
+            <i class="icon-back"></i>
+          </div>
+          <h1 class="title" v-html="currentSong.name"></h1>
+          <h2 class="subtitle" v-html="currentSong.singer"></h2>
+        </div>
+        <div class="middle">
+          <div class="middle-l">
+            <div class="cd-wrapper">
+              <div class="cd">
+                <img class="image" :src="currentSong.image">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom">
+          <div class="operators">
+            <div class="icon i-left">
+              <i class="icon-sequence"></i>
+            </div>
+            <div class="icon i-left">
+              <i class="icon-prev"></i>
+            </div>
+            <div class="icon i-center">
+              <i class="icon-play"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon-next"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon icon-not-favorite"></i>
             </div>
           </div>
         </div>
       </div>
-      <div class="bottom">
-        <div class="operators">
-          <div class="icon i-left">
-            <i class="icon-sequence"></i>
-          </div>
-          <div class="icon i-left">
-            <i class="icon-prev"></i>
-          </div>
-          <div class="icon i-center">
-            <i class="icon-play"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon-next"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon icon-not-favorite"></i>
-          </div>
+    </transition>
+
+    <transition name="mini">
+      <div class="mini-player" v-show="!fullScreen" @click="open">
+        <!--先显示-->
+        <div class="icon">
+          <img width="40" height="40" :src="currentSong.image">
+        </div>
+        <div class="text">
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc" v-html="currentSong.singer"></p>
+        </div>
+        <div class="control"></div>
+        <div class="control">
+          <i class="icon-playlist"></i>
         </div>
       </div>
-    </div>
-    <div class="mini-player" v-show="!fullScreen" @click="open">
-      <!--先显示-->
-      <div class="icon">
-        <img width="40" height="40" :src="currentSong.image">
-      </div>
-      <div class="text">
-        <h2 class="name" v-html="currentSong.name"></h2>
-        <p class="desc" v-html="currentSong.singer"></p>
-      </div>
-      <div class="control"></div>
-      <div class="control">
-        <i class="icon-playlist"></i>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -196,6 +201,16 @@
             text-align: left
           .icon-favorite
             color: $color-sub-theme
+      &.normal-enter-active, &.normal-leave-active  // 过渡
+        transition: all 0.4s
+        .top,.bottom  // player透明度动画和子元素位移动画同步进行
+          transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32) // 贝塞尔运动曲线
+      &.normal-enter, &.normal-leave-to
+        opacity: 0  // 最初透明度为0,不可见(主播放器有一个透明度动画 内部的标题和操作区有一个纵向位移动画)
+        .top
+          transform: translate3d(0, -100px, 0)  // 最初在向上偏100px 有一个下落效果
+        .bottom
+          transform: translate3d(0, 100px, 0) // 最初向下偏100px 有一个上移效果
     .mini-player
       display: flex
       align-items: center
@@ -206,48 +221,49 @@
       width: 100%
       height: 60px
       background: $color-highlight-background
-      //&.mini-enter-active, &.mini-leave-active
-        //transition: all 0.4s
-      //&.mini-enter, &.mini-leave-to
-        //opacity: 0
-        .icon
-          flex: 0 0 40px
-          width: 40px
-          padding: 0 10px 0 20px
-          img
-            border-radius: 50%
-            &.play
-              animation: rotate 10s linear infinite
-            &.pause
-              animation-play-state: paused
-        .text
-          display: flex
-          flex-direction: column
-          justify-content: center // 向中间聚拢
-          flex: 1
-          line-height: 20px
-          overflow: hidden
-          .name
-            margin-bottom: 2px
-            no-wrap()
-            font-size: $font-size-medium
-            color: $color-text
-          .desc
-            no-wrap()
-            font-size: $font-size-small
-            color: $color-text-d
-        .control
-          flex: 0 0 30px
-          width: 30px
-          padding: 0 10px
-          .icon-play-mini, .icon-pause-mini, .icon-playlist
-            font-size: 30px
-            color: $color-theme-d
-          //.icon-mini
-           // font-size: 32px
-           // position: absolute
-            //left: 0
-           // top: 0
+      &.mini-enter-active, &.mini-leave-active
+        transition: all 0.4s
+      &.mini-enter, &.mini-leave-to
+        opacity: 0  // 迷你播放器只有一个透明度动画
+      .icon
+        flex: 0 0 40px
+        width: 40px
+        padding: 0 10px 0 20px
+        img
+          border-radius: 50%
+          &.play
+            animation: rotate 10s linear infinite
+          &.pause
+            animation-play-state: paused
+      .text
+        display: flex
+        flex-direction: column
+        justify-content: center // 向中间聚拢
+        flex: 1
+        line-height: 20px
+        overflow: hidden
+        .name
+          margin-bottom: 2px
+          no-wrap()
+          font-size: $font-size-medium
+          color: $color-text
+        .desc
+          no-wrap()
+          font-size: $font-size-small
+          color: $color-text-d
+      .control
+        flex: 0 0 30px
+        width: 30px
+        padding: 0 10px
+        .icon-play-mini, .icon-pause-mini, .icon-playlist
+          font-size: 30px
+          color: $color-theme-d
+
+        //.icon-mini
+         // font-size: 32px
+         // position: absolute
+          //left: 0
+         // top: 0
       @keyframes rotate
         0%
           transform: rotate(0)
