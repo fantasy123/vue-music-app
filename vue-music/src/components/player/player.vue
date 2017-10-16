@@ -1,6 +1,11 @@
 <template>
   <div class="player" v-show="playList.length>0">
-    <transition name="normal">
+    <transition name="normal"
+                 @enter="enter"
+                 @after-enter="afterEnter"
+                 @leave="leave"
+                 @after-leave="leaveEnter"
+    >
       <!--有歌曲在播放=>显示播放器-->
       <div class="normal-player" v-show="fullScreen">
         <!--fullScreen在state里设置为false,则播放器默认收起,mini默认展示-->
@@ -66,6 +71,7 @@
 
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex' // V 数据映射到组件DOM上
+  // import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
 
   export default {
     computed: {
@@ -76,6 +82,48 @@
       ])
     },
     methods: {
+      enter(el, done) { // el:作用元素 done的回调就是afterEnter
+        const {x, y, scale} = this._getPosAndScale()
+
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})` // mini时候的位置(相对于最大化时的偏移)
+          },
+          60: {
+            transform: `translate3d(0, 0, 0) scale(1.1)`  // 位置已归位 但是形状还没有归位
+          },
+          100: {
+            transform: `translate3d(0, 0, 0) scale(1)`  // 形状也归位
+          }
+        }
+
+        animation.name = 'yq'
+      },
+      afterEnter() {
+
+      },
+      leave(el, done) { // done的回调就是afterLeave
+
+      },
+      afterLeave() {
+
+      },
+      _getPosAndScale() { // 获取初始位置与缩放尺寸
+        const targetWidth = 40  // miniPlayer里cd的宽度
+        const paddingLeft = 40 // miniPlayer里cd   中心坐标   距离左边的距离
+        const paddingBottom = 30 // miniPlayer里cd中心坐标距离底部的距离
+        const paddingTop = 80 // player里cd顶部   边缘   距离顶部的距离
+        const width = window.innerWidth * 0.8 // 最大化时cd的宽度
+        const scale = targetWidth / width // 初始缩放比例
+        const x = -(window.innerWidth / 2 - paddingLeft)  // 圆心的横向偏移
+        const y = window.innerHeight - paddingTop - width / 2 - paddingBottom // 圆心的纵向偏移
+
+        return {
+          x,
+          y,
+          scale
+        }
+      },
       back() {
         this.setFullScreen(false) // 接收一个flag作为参数(详见mutations.js)
       },
