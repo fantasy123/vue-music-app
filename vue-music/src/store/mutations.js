@@ -21,7 +21,7 @@ const mutations = { // 与actions不同的是 它是同步修改状态 没有任
   [types.SET_PLAY_MODE](state, mode) {
     state.mode = mode
   },
-  [types.SET_CYRRENT_INDEX](state, index) {
+  [types.SET_CURRENT_INDEX](state, index) {
     state.currentIndex = index
   }
 }
