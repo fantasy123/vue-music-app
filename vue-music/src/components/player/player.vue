@@ -4,7 +4,7 @@
                  @enter="enter"
                  @after-enter="afterEnter"
                  @leave="leave"
-                 @after-leave="leaveEnter"
+                 @after-leave="afterLeave"
     >
       <!--有歌曲在播放=>显示播放器-->
       <div class="normal-player" v-show="fullScreen">
@@ -21,7 +21,7 @@
         </div>
         <div class="middle">
           <div class="middle-l">
-            <div class="cd-wrapper">
+            <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd">
                 <img class="image" :src="currentSong.image">
               </div>
@@ -71,7 +71,10 @@
 
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex' // V 数据映射到组件DOM上
-  // import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
+  import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
+  import {prefixStyle} from 'common/js/dom'
+
+  const transform = prefixStyle('transform')
 
   export default {
     computed: {
@@ -97,16 +100,31 @@
           }
         }
 
-        animation.name = 'yq'
+        animations.registerAnimation({  // 注册这个动画
+          name: 'move', // 动画名称
+          animation,  // 动画内容
+          presets: {
+            duration: 400,  // 持续时间
+            easing: 'linear'  // 速度曲线
+          }
+        })
+
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done) // 运行这个动画 目标DOM/应用的动画名称/回调
       },
       afterEnter() {
-
+        animations.unregisterAnimation('move')  // 销毁动画
+        this.$refs.cdWrapper.style.animation = '' // 清空animation属性
       },
       leave(el, done) { // done的回调就是afterLeave
-
+        // reset动画较为简单 不用animation 用原生JS设置transition即可
+        this.$refs.cdWrapper.style.transition = 'all 0.4s'  // 设置过渡
+        const {x, y, scale} = this._getPosAndScale()  // 获得最终位置和缩放
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`  // 设置最终位置和缩放
+        this.$refs.cdWrapper.addEventListener('transitionend', done)  // 触发回调
       },
-      afterLeave() {
-
+      afterLeave() {  // 清空重置动画
+        this.$refs.cdWrapper.style.transition = ''
+        this.$refs.cdWrapper.style[transform] = ''
       },
       _getPosAndScale() { // 获取初始位置与缩放尺寸
         const targetWidth = 40  // miniPlayer里cd的宽度
