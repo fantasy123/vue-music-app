@@ -29,6 +29,11 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-bar">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper"></div>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
@@ -69,7 +74,8 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url"></audio>
+    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime"></audio>
+    <!--timeupdate在audio在播放时触发 回调为updateTime 参数为一个事件对象-->
   </div>
 </template>
 
@@ -81,6 +87,11 @@
   const transform = prefixStyle('transform')
 
   export default {
+    data() {
+      return {
+        currentTime: 0
+      }
+    },
     computed: {
       cdCls() { // cd加旋转类抑或停止旋转类也由播放状态决定
         return this.playing ? 'play' : 'play pause'
@@ -140,6 +151,26 @@
       afterLeave() {  // 清空重置动画
         this.$refs.cdWrapper.style.transition = ''
         this.$refs.cdWrapper.style[transform] = ''
+      },
+      updateTime(e) {
+        this.currentTime = e.target.currentTime // audio标签(e.target)的当前时间属性,可读写
+      },
+      format(interval) {  // 时间戳
+        interval = interval | 0 // 一个正数的向下取整
+        const minute = (interval / 60) | 0
+        const second = this._pad(interval % 60)
+
+        return `${minute}:${second}`
+      },
+      _pad(num, n = 2) {  // 补0函数 参数:目标数字 最终字符串的长度(这里默认是2位)
+        let len = num.toString().length
+
+        while (len < n) {
+          num = '0' + num
+          len++
+        }
+
+        return num
       },
       _getPosAndScale() { // 获取初始位置与缩放尺寸
         const targetWidth = 40  // miniPlayer里cd的宽度
