@@ -34,13 +34,13 @@
               <i class="icon-sequence"></i>
             </div>
             <div class="icon i-left">
-              <i class="icon-prev"></i>
+              <i class="icon-prev" @click="prev"></i>
             </div>
             <div class="icon i-center">
               <i @click="togglePlaying" :class="playIcon"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-next"></i>
+              <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-not-favorite"></i>
@@ -95,7 +95,8 @@
         'fullScreen', // 组件级使用的变量
         'playList',
         'currentSong', // getters里通过计算属性计算得到
-        'playing' // 从vuex里拿播放状态 作为组件级全局变量
+        'playing', // 从vuex里拿播放状态 作为组件级全局变量
+        'currentIndex'
       ])
     },
     methods: {
@@ -165,9 +166,36 @@
       togglePlaying() {
         this.setPlayingState(!this.playing) // 操作vuex数据 仅仅设置playing不能取反 真正控制音乐播放的是播放器 要调用audio的play和pause方法
       },
+      next() {
+        let index = this.currentIndex + 1
+
+        if (index === this.playList.length) {
+          index = 0 // 切回第一首
+        }
+
+        this.setCurrentIndex(index)
+
+        if (!this.playing) {  // 没有在播放
+          this.togglePlaying()  // 切歌一定是默认播放的
+        }
+      },
+      prev() {
+        let index = this.currentIndex - 1
+
+        if (index === -1) { // 从第一首歌往前退
+          index = this.playList.length - 1  // 切到最后一首
+        }
+
+        this.setCurrentIndex(index) // 修改currentIndex=>计算出currentSong=>currentSong变化触发audio的play方法=>播放新的歌曲
+
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+      },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
-        setPlayingState: 'SET_PLAYING_STATE'  // 建立映射
+        setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
+        setCurrentIndex: 'SET_CURRENT_INDEX'
       })
     },
     watch: {
