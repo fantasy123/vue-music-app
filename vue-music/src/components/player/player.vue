@@ -31,7 +31,10 @@
         <div class="bottom">
           <div class="progress-bar">
             <span class="time time-l">{{format(currentTime)}}</span>
-            <div class="progress-bar-wrapper"></div>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent"></progress-bar>
+              <!--百分比传给进度条组件设置已播放进度条的宽度和按钮位置-->
+            </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
@@ -83,6 +86,7 @@
   import {mapGetters, mapMutations} from 'vuex' // V 数据映射到组件DOM上
   import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
   import {prefixStyle} from 'common/js/dom'
+  import ProgressBar from 'base/progress-bar/progress-bar'
 
   const transform = prefixStyle('transform')
 
@@ -101,6 +105,9 @@
       },
       miniIcon() {
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
+      percent() {
+        return this.currentTime / this.currentSong.duration // 根据当前播放时间和总时长计算出百分比
       },
       ...mapGetters([ // mapGetters在计算属性里 定义全局变量
         'fullScreen', // 组件级使用的变量
@@ -242,6 +249,9 @@
           newPlaying ? audio.play() : audio.pause() // 如果为真 调用audio的播放API 否则调用暂停API
         })
       }
+    },
+    components: {
+      ProgressBar
     }
   }
 </script>
@@ -332,19 +342,34 @@
                 position: absolute
                 top: 0
                 left: 0
-
       .bottom
         position: absolute
         bottom: 50px
         width: 100%
+        .progress-bar
+          display: flex
+          align-items: center
+          width: 80%
+          margin: 0px auto
+          padding: 10px 0
+          .time
+            flex: 0 0 30px
+            width: 30px
+            line-height: 30px
+            font-size: $font-size-small
+            color: $color-text
+            &.time-l
+              text-align: left
+            &.time-r
+              text-align: right
+          .progress-bar-wrapper
+            flex: 1
         .operators
           display: flex
           align-items: center
           .icon
             flex: 1
             color: $color-theme
-            //&.disable
-              //color: $color-theme-d
             i
               font-size: 30px
           .i-left
