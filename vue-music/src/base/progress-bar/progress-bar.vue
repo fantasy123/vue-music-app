@@ -1,5 +1,5 @@
 <template>
-  <div class="progress-bar" ref="progressBar">
+  <div class="progress-bar" ref="progressBar" @click="progressClick">
     <div class="bar-inner">
       <div class="progress" ref="progress"></div>
       <!--走过的位置-->
@@ -53,6 +53,10 @@
         this.touch.initiated = false  // 一次触摸事件结束 重置为false
 
         this._triggerPercent()  // 同时更改percent 以实现拖动和监听同步
+      },
+      progressClick(e) {
+        this._offset(e.offsetX) // 把点击位置的横坐标设置为progress的宽度和按钮的偏移
+        this._triggerPercent()  // 同步percent
       },
       _offset(offsetWidth) { // 简单的函数封装 避免大量的重复代码
         this.$refs.progress.style.width = `${offsetWidth}px`
