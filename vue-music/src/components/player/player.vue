@@ -70,7 +70,11 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlaying" :class="miniIcon"></i>
+          <progress-circle :radius="radius" :percent="percent">
+            <!--radius不能直接传32,因为我们把它定义为Number类型,这里会解析成字符串,所以用一个变量存储-->
+            <i @click.stop="togglePlaying" :class="miniIcon" class="icon-mini"></i>
+            <!--slot插槽内容-->
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -87,13 +91,15 @@
   import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
   import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
+  import ProgressCircle from 'base/progress-circle/progress-circle'
 
   const transform = prefixStyle('transform')
 
   export default {
     data() {
       return {
-        currentTime: 0
+        currentTime: 0,
+        radius: 32
       }
     },
     computed: {
@@ -258,7 +264,8 @@
       }
     },
     components: {
-      ProgressBar
+      ProgressBar,
+      ProgressCircle
     }
   }
 </script>
@@ -447,6 +454,11 @@
         .icon-play-mini, .icon-pause-mini, .icon-playlist
           font-size: 30px
           color: $color-theme-d
+        .icon-mini  // 相当于progress-circle绝对定位
+          position: absolute
+          left: 0
+          top: 0
+          font-size: 32px
   @keyframes rotate
     0%
       transform: rotate(0)
