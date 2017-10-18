@@ -32,7 +32,7 @@
           <div class="progress-bar">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent"></progress-bar>
+              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
               <!--百分比传给进度条组件设置已播放进度条的宽度和按钮位置-->
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
@@ -234,7 +234,14 @@
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
         setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
         setCurrentIndex: 'SET_CURRENT_INDEX'
-      })
+      }),
+      onProgressBarChange(percent) {
+        this.$refs.audio.currentTime = this.currentSong.duration * percent  // 由新percent反推currentTime(计算最底层的数据,驱动其他数据)
+
+        if (!this.playing) {
+          this.togglePlaying()  // 拖动结束 要继续播放(无论原先是暂停还是播放)
+        }
+      }
     },
     watch: {
       currentSong() { // 打开第一首歌/换歌的时候 播放音频
