@@ -1,10 +1,10 @@
 <template>
   <div class="player" v-show="playList.length>0">
     <transition name="normal"
-                 @enter="enter"
-                 @after-enter="afterEnter"
-                 @leave="leave"
-                 @after-leave="afterLeave"
+                @enter="enter"
+                @after-enter="afterEnter"
+                @leave="leave"
+                @after-leave="afterLeave"
     >
       <!--有歌曲在播放=>显示播放器-->
       <div class="normal-player" v-show="fullScreen">
@@ -87,36 +87,37 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters, mapMutations} from 'vuex' // V 数据映射到组件DOM上
+  import { mapGetters, mapMutations } from 'vuex' // V 数据映射到组件DOM上
   import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
-  import {prefixStyle} from 'common/js/dom'
+  import { prefixStyle } from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
-  import {playMode} from 'common/js/config'
+  import { playMode } from 'common/js/config'
+  import { shuffle } from 'common/js/util'
 
   const transform = prefixStyle('transform')
 
   export default {
-    data() {
+    data () {
       return {
         currentTime: 0,
         radius: 32
       }
     },
     computed: {
-      cdCls() { // cd加旋转类抑或停止旋转类也由播放状态决定
+      cdCls () { // cd加旋转类抑或停止旋转类也由播放状态决定
         return this.playing ? 'play' : 'play pause'
       },
-      playIcon() {  // 操作区icon样式根据playing来改变
+      playIcon () {  // 操作区icon样式根据playing来改变
         return this.playing ? 'icon-pause' : 'icon-play'
       },
-      miniIcon() {
+      miniIcon () {
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
       },
-      percent() {
+      percent () {
         return this.currentTime / this.currentSong.duration // 根据当前播放时间和总时长计算出百分比
       },
-      iconMode() {
+      iconMode () {
         return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
       },
       ...mapGetters([ // mapGetters在计算属性里 定义全局变量
@@ -125,11 +126,12 @@
         'currentSong', // getters里通过计算属性计算得到
         'playing', // 从vuex里拿播放状态 作为组件级全局变量
         'currentIndex',
-        'mode'  // 可以通过this.mode访问到当前播放模式
+        'mode',  // 可以通过this.mode访问到当前播放模式
+        'sequenceList'  // 原始顺序列表
       ])
     },
     methods: {
-      enter(el, done) { // el:作用元素 done的回调就是afterEnter
+      enter (el, done) { // el:作用元素 done的回调就是afterEnter
         const {x, y, scale} = this._getPosAndScale()
 
         let animation = {
@@ -155,32 +157,32 @@
 
         animations.runAnimation(this.$refs.cdWrapper, 'move', done) // 运行这个动画 目标DOM/应用的动画名称/回调
       },
-      afterEnter() {
+      afterEnter () {
         animations.unregisterAnimation('move')  // 销毁动画
         this.$refs.cdWrapper.style.animation = '' // 清空animation属性
       },
-      leave(el, done) { // done的回调就是afterLeave
+      leave (el, done) { // done的回调就是afterLeave
         // reset动画较为简单 不用animation 用原生JS设置transition即可
         this.$refs.cdWrapper.style.transition = 'all 0.4s'  // 设置过渡
         const {x, y, scale} = this._getPosAndScale()  // 获得最终位置和缩放
         this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`  // 设置最终位置和缩放
         this.$refs.cdWrapper.addEventListener('transitionend', done)  // 触发回调
       },
-      afterLeave() {  // 清空重置动画
+      afterLeave () {  // 清空重置动画
         this.$refs.cdWrapper.style.transition = ''
         this.$refs.cdWrapper.style[transform] = ''
       },
-      updateTime(e) {
+      updateTime (e) {
         this.currentTime = e.target.currentTime // audio标签(e.target)的当前时间属性,可读写
       },
-      format(interval) {  // 时间戳
+      format (interval) {  // 时间戳
         interval = interval | 0 // 一个正数的向下取整
         const minute = (interval / 60) | 0
         const second = this._pad(interval % 60)
 
         return `${minute}:${second}`
       },
-      _pad(num, n = 2) {  // 补0函数 参数:目标数字 最终字符串的长度(这里默认是2位)
+      _pad (num, n = 2) {  // 补0函数 参数:目标数字 最终字符串的长度(这里默认是2位)
         let len = num.toString().length
 
         while (len < n) {
@@ -190,7 +192,7 @@
 
         return num
       },
-      _getPosAndScale() { // 获取初始位置与缩放尺寸
+      _getPosAndScale () { // 获取初始位置与缩放尺寸
         const targetWidth = 40  // miniPlayer里cd的宽度
         const paddingLeft = 40 // miniPlayer里cd   中心坐标   距离左边的距离
         const paddingBottom = 30 // miniPlayer里cd中心坐标距离底部的距离
@@ -206,16 +208,16 @@
           scale
         }
       },
-      back() {
+      back () {
         this.setFullScreen(false) // 接收一个flag作为参数(详见mutations.js)
       },
-      open() {
+      open () {
         this.setFullScreen(true)  // 不能直接设置fullScreen为true 要对vuex数据进行全局操作
       },
-      togglePlaying() {
+      togglePlaying () {
         this.setPlayingState(!this.playing) // 操作vuex数据 仅仅设置playing不能取反 真正控制音乐播放的是播放器 要调用audio的play和pause方法
       },
-      next() {
+      next () {
         let index = this.currentIndex + 1
 
         if (index === this.playList.length) {
@@ -228,7 +230,7 @@
           this.togglePlaying()  // 切歌一定是默认播放的
         }
       },
-      prev() {
+      prev () {
         let index = this.currentIndex - 1
 
         if (index === -1) { // 从第一首歌往前退
@@ -241,33 +243,61 @@
           this.togglePlaying()
         }
       },
-      onProgressBarChange(percent) {
+      onProgressBarChange (percent) {
         this.$refs.audio.currentTime = this.currentSong.duration * percent  // 由新percent反推currentTime(计算最底层的数据,驱动其他数据)
 
         if (!this.playing) {
           this.togglePlaying()  // 拖动结束 要继续播放(无论原先是暂停还是播放)
         }
       },
-      changeMode() {
+      changeMode () {
         // 三种播放模式是用数字表示
         const mode = (this.mode + 1) % 3  // 一共3种模式 对3取余
+
         // 接下来通过mutation设置到vuex里
         this.setPlayMode(mode)
+
+        // 真正设置播放列表
+        let list = null
+
+        if (mode === playMode.random) {
+          list = shuffle(this.sequenceList) // 打乱当前顺序列表
+        } else {
+          list = this.sequenceList  // 顺序播放或循环播放 活跃列表就是顺序列表
+        }
+
+        this.resetCurrentIndex(list)  // 同时改变currentIndex 使得最终currentSong的id不变
+        // 去vuex里修改
+        this.setPlayList(list)  // 修改了playList 如果currentIndex没变  那么currentSong会改变 但我们希望它不改变
+      },
+      resetCurrentIndex (list) {
+        let index = list.findIndex((item) => {  // ES 6语法
+          return item.id === this.currentSong.id  // 在打乱后的随机列表里找到当前播放的歌曲(id唯一标记一首歌) 返回它的索引
+        })
+
+        this.setCurrentIndex(index) // 把重置后的索引设置到vuex里
       },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
         setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
         setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode: 'SET_PLAY_MODE'  // 通过getters得到mode 通过mutation改变mode
+        setPlayMode: 'SET_PLAY_MODE',  // 通过getters得到mode 通过mutation改变mode
+        setPlayList: 'SET_PLAYLIST'
       })
     },
     watch: {
-      currentSong() { // 打开第一首歌/换歌的时候 播放音频
+      currentSong (newSong, oldSong) { // 打开第一首歌/换歌的时候 播放音频
+        if (newSong.id === oldSong.id) {  // 虽然代码层面上watch触发了 但我们可以认为加限制条件
+          return // id没变 什么都不做
+        }
+
         this.$nextTick(() => {  // DOM ready
           this.$refs.audio.play()
         })
       },
-      playing(newPlaying) { // 监测playing状态
+      // 歌曲暂停状态下切换播放模式的时候 currentIndex和playList同时改变,currentSong也改变(只是id没有变)
+      // 所以会触发play 这是我们不希望看到的
+      playing (newPlaying) { // 监测playing状态
         const audio = this.$refs.audio  // 缓存audio标签
 
         this.$nextTick(() => {
@@ -358,9 +388,9 @@
               border-radius: 50%
               border: 10px solid rgba(255, 255, 255, 0.1)
               &.play
-                animation: rotate 20s linear infinite // keyframe:rotate  20s一圈 匀速旋转 无限旋转
+                animation: rotate 20s linear infinite
               &.pause
-                animation-play-state: paused  // 设置动画播放状态为停
+                animation-play-state: paused
               .image
                 width: 100%
                 height: 100%
@@ -409,12 +439,12 @@
             text-align: left
           .icon-favorite
             color: $color-sub-theme
-      &.normal-enter-active, &.normal-leave-active  // 过渡
+      &.normal-enter-active, &.normal-leave-active // 过渡
         transition: all 0.4s
-        .top,.bottom  // player透明度动画和子元素位移动画同步进行
+        .top, .bottom // player透明度动画和子元素位移动画同步进行
           transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32) // 贝塞尔运动曲线
       &.normal-enter, &.normal-leave-to
-        opacity: 0  // 最初透明度为0,不可见(主播放器有一个透明度动画 内部的标题和操作区有一个纵向位移动画)
+        opacity: 0 // 最初透明度为0,不可见(主播放器有一个透明度动画 内部的标题和操作区有一个纵向位移动画)
         .top
           transform: translate3d(0, -100px, 0)  // 最初在向上偏100px 有一个下落效果
         .bottom
@@ -431,8 +461,8 @@
       background: $color-highlight-background
       &.mini-enter-active, &.mini-leave-active
         transition: all 0.4s
-      &.mini-enter, &.mini-leave-to
-        opacity: 0  // 迷你播放器只有一个透明度动画
+      &.mini-enter, &.mini-leave-to // 迷你播放器只有一个透明度动画
+        opacity: 0
       .icon
         flex: 0 0 40px
         width: 40px
@@ -466,11 +496,12 @@
         .icon-play-mini, .icon-pause-mini, .icon-playlist
           font-size: 30px
           color: $color-theme-d
-        .icon-mini  // 相当于progress-circle绝对定位
+        .icon-mini // 相当于progress-circle绝对定位
           position: absolute
           left: 0
           top: 0
           font-size: 32px
+
   @keyframes rotate
     0%
       transform: rotate(0)

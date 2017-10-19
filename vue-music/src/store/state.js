@@ -6,7 +6,7 @@ const state = {
   playing: false, // 设最底层的数据
   fullScreen: false,  // 收起
   playList: [], // sequenceList和playMode综合获得
-  sequenceList: [],
+  sequenceList: [], // 原始列表
   mode: playMode.sequence,  // 语义化表示播放模式
   currentIndex: -1
 }
