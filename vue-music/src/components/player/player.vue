@@ -38,8 +38,8 @@
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon i-left">
-              <i class="icon-sequence"></i>
+            <div class="icon i-left" @click="changeMode">
+              <i :class="iconMode"></i>
             </div>
             <div class="icon i-left">
               <i class="icon-prev" @click="prev"></i>
@@ -92,6 +92,7 @@
   import {prefixStyle} from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
+  import {playMode} from 'common/js/config'
 
   const transform = prefixStyle('transform')
 
@@ -115,12 +116,16 @@
       percent() {
         return this.currentTime / this.currentSong.duration // 根据当前播放时间和总时长计算出百分比
       },
+      iconMode() {
+        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+      },
       ...mapGetters([ // mapGetters在计算属性里 定义全局变量
         'fullScreen', // 组件级使用的变量
         'playList',
         'currentSong', // getters里通过计算属性计算得到
         'playing', // 从vuex里拿播放状态 作为组件级全局变量
-        'currentIndex'
+        'currentIndex',
+        'mode'  // 可以通过this.mode访问到当前播放模式
       ])
     },
     methods: {
@@ -236,18 +241,25 @@
           this.togglePlaying()
         }
       },
-      ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
-        setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
-        setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
-        setCurrentIndex: 'SET_CURRENT_INDEX'
-      }),
       onProgressBarChange(percent) {
         this.$refs.audio.currentTime = this.currentSong.duration * percent  // 由新percent反推currentTime(计算最底层的数据,驱动其他数据)
 
         if (!this.playing) {
           this.togglePlaying()  // 拖动结束 要继续播放(无论原先是暂停还是播放)
         }
-      }
+      },
+      changeMode() {
+        // 三种播放模式是用数字表示
+        const mode = (this.mode + 1) % 3  // 一共3种模式 对3取余
+        // 接下来通过mutation设置到vuex里
+        this.setPlayMode(mode)
+      },
+      ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
+        setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
+        setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setPlayMode: 'SET_PLAY_MODE'  // 通过getters得到mode 通过mutation改变mode
+      })
     },
     watch: {
       currentSong() { // 打开第一首歌/换歌的时候 播放音频
