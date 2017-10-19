@@ -7,7 +7,7 @@
     <!--是singer实例里的singer.name-->
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div class="play" v-show="songs.length>0" ref="playBtn">
+        <div class="play" v-show="songs.length>0" ref="playBtn" @click="random">
           <!--数据加载完之后才显示随机播放全部按钮-->
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
@@ -85,8 +85,14 @@
           index
         })
       },
+      random() {
+        this.randomPlay({ // 接收当前list作为参数 action负责打乱以及处理一系列其他播放相关操作
+          list: this.songs
+        })
+      },
       ...mapActions([ // mapGetters写在computed里 得到全局变量 mapMutations和mapActions写在methods里 得到全局方法
-        'selectPlay'  // 对应actions里的selectPlay动作 在这里注册之后可以作为全局方法在这个组件里调用
+        'selectPlay',  // 对应actions里的selectPlay动作 在这里注册之后可以作为全局方法在这个组件里调用
+        'randomPlay'
       ])
     },
     mounted() {

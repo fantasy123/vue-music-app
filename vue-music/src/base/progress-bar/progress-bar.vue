@@ -55,7 +55,10 @@
         this._triggerPercent()  // 同时更改percent 以实现拖动和监听同步
       },
       progressClick(e) {
-        this._offset(e.offsetX) // 把点击位置的横坐标设置为progress的宽度和按钮的偏移
+        const rect = this.$refs.progressBar.getBoundingClientRect() // 返回元素的大小及相对于视口的位置
+        const offsetWidth = e.pageX - rect.left // e.pageX为按钮到屏幕左边缘的距离
+        this._offset(offsetWidth)
+//        this._offset(e.offsetX) // 把点击位置的横坐标设置为progress的宽度和按钮的偏移(e.offsetX获取不对)
         this._triggerPercent()  // 同步percent
       },
       _offset(offsetWidth) { // 简单的函数封装 避免大量的重复代码

@@ -81,7 +81,7 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime"></audio>
+    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end"></audio>
     <!--timeupdate在audio在播放时触发 回调为updateTime 参数为一个事件对象-->
   </div>
 </template>
@@ -242,6 +242,18 @@
         if (!this.playing) {
           this.togglePlaying()
         }
+      },
+      end () {
+        // 不会自动播放 以下功能都是扯淡
+        if (this.mode === playMode.loop) {
+          this.loop()
+        } else {
+          this.next() // 如果是随机播放模式 playList已打乱 currentIndex+1之后就不是顺序列表的下一首
+        }
+      },
+      loop () {
+        this.$refs.audio.currentTime = 0
+        this.$refs.audio.play()
       },
       onProgressBarChange (percent) {
         this.$refs.audio.currentTime = this.currentSong.duration * percent  // 由新percent反推currentTime(计算最底层的数据,驱动其他数据)
@@ -442,13 +454,16 @@
       &.normal-enter-active, &.normal-leave-active // 过渡
         transition: all 0.4s
         .top, .bottom // player透明度动画和子元素位移动画同步进行
-          transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32) // 贝塞尔运动曲线
+          transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32)
+      // 贝塞尔运动曲线
       &.normal-enter, &.normal-leave-to
         opacity: 0 // 最初透明度为0,不可见(主播放器有一个透明度动画 内部的标题和操作区有一个纵向位移动画)
         .top
-          transform: translate3d(0, -100px, 0)  // 最初在向上偏100px 有一个下落效果
+          transform: translate3d(0, -100px, 0)
+        // 最初在向上偏100px 有一个下落效果
         .bottom
-          transform: translate3d(0, 100px, 0) // 最初向下偏100px 有一个上移效果
+          transform: translate3d(0, 100px, 0)
+    // 最初向下偏100px 有一个上移效果
     .mini-player
       display: flex
       align-items: center
