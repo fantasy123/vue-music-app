@@ -305,6 +305,7 @@
 
         this.$nextTick(() => {  // DOM ready
           this.$refs.audio.play()
+          this.currentSong.getlyric() // 歌曲播放立刻加载歌词
         })
       },
       // 歌曲暂停状态下切换播放模式的时候 currentIndex和playList同时改变,currentSong也改变(只是id没有变)

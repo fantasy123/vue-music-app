@@ -1,3 +1,6 @@
+import {getLyric} from 'api/song'
+import {ERR_OK} from 'api/config'
+
 // 从musicData里提取需要的数据 构造歌曲对象
 // 设计成类而不是对象是为了 : 1.避免大量的重复代码,集中维护在一个文件里 2 : 类的扩展性比对象要强,面向对象的编程方式
 export default class Song {
@@ -11,6 +14,16 @@ export default class Song {
     this.duration = duration
     this.image = image  // 歌曲图片
     this.url = url  // 歌曲请求路径
+  }
+
+  // 歌词可以理解为Song类的一个属性
+  getlyric() {  // 歌词直接拿不到 可以给Song类扩展一个获取歌词的方法 内部调用getLyric这个API
+    getLyric(this.mid).then((res) => {
+      if (res.retcode === ERR_OK) {
+        this.lyric = res.lyric  // 赋值给Song类的歌词属性
+        console.log(this.lyric) // base64字符串 decode一下就可出现歌词
+      }
+    })
   }
 }
 
