@@ -1,5 +1,6 @@
-import {getLyric} from 'api/song'
-import {ERR_OK} from 'api/config'
+import { getLyric } from 'api/song'
+import { ERR_OK } from 'api/config'
+import { Base64 } from './util'
 
 // 从musicData里提取需要的数据 构造歌曲对象
 // 设计成类而不是对象是为了 : 1.避免大量的重复代码,集中维护在一个文件里 2 : 类的扩展性比对象要强,面向对象的编程方式
@@ -17,12 +18,22 @@ export default class Song {
   }
 
   // 歌词可以理解为Song类的一个属性
-  getlyric() {  // 歌词直接拿不到 可以给Song类扩展一个获取歌词的方法 内部调用getLyric这个API
-    getLyric(this.mid).then((res) => {
-      if (res.retcode === ERR_OK) {
-        this.lyric = res.lyric  // 赋值给Song类的歌词属性
-        console.log(this.lyric) // base64字符串 decode一下就可出现歌词
-      }
+  getlyric () {  // 歌词直接拿不到 可以给Song类扩展一个获取歌词的方法 内部调用getLyric这个API
+    if (this.lyric) { // 如果已经有歌词 便不再请求 直接返回一个promise
+      return Promise.resolve(this.lyric)  // api/song/getLyric本身返回一个promise
+    }
+
+    return new Promise((resolve, reject) => { // 因为要返回一个Promise,所以封装一个Promise,处理成功和失败2种情况
+      // 只代表成功或失败,不作具体操作
+      getLyric(this.mid).then((res) => {  // 不处理获取歌词后的逻辑 只负责获取歌词 把结果返回
+        if (res.retcode === ERR_OK) {
+          let base = new Base64()
+          this.lyric = base.decode(res.lyric) // 赋值给Song类的歌词属性 base64字符串 decode一下就可出现歌词
+          resolve(this.lyric)
+        } else {
+          reject('no lyric')
+        }
+      })
     })
   }
 }

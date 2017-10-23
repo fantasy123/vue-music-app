@@ -94,6 +94,7 @@
   import ProgressCircle from 'base/progress-circle/progress-circle'
   import { playMode } from 'common/js/config'
   import { shuffle } from 'common/js/util'
+  import Lyric from 'lyric-parser'  // 是一个class
 
   const transform = prefixStyle('transform')
 
@@ -101,7 +102,8 @@
     data () {
       return {
         currentTime: 0,
-        radius: 32
+        radius: 32,
+        currentLyric: null  // 初始化当前的歌词
       }
     },
     computed: {
@@ -289,6 +291,12 @@
 
         this.setCurrentIndex(index) // 把重置后的索引设置到vuex里
       },
+      _getlyric() {
+        this.currentSong.getlyric().then((lyric) => { // 还可以接收一个回调函数 进行更细致的操作
+          this.processedLyric = new Lyric(lyric)  // 传入Song类的getlyric方法得到的歌词 构造一个规范化各行歌词信息的歌词实例
+          console.log(this.processedLyric)
+        })
+      },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
         setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
@@ -305,7 +313,7 @@
 
         this.$nextTick(() => {  // DOM ready
           this.$refs.audio.play()
-          this.currentSong.getlyric() // 歌曲播放立刻加载歌词
+          this._getlyric() // 歌曲播放立刻加载歌词
         })
       },
       // 歌曲暂停状态下切换播放模式的时候 currentIndex和playList同时改变,currentSong也改变(只是id没有变)
