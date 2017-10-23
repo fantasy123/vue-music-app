@@ -19,7 +19,11 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
         </div>
-        <div class="middle">
+        <div class="middle"
+              @touchstart.prevent="middleTouchStart"
+              @touchmove.prevent="middleTouchMove"
+              @touchend="middleTouchEnd"
+        >
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
@@ -42,6 +46,10 @@
           </scroll>
         </div>
         <div class="bottom">
+          <div class="dot-wrapper">
+            <span class="dot" :class="{'active' : currentShow === 'cd'}"></span>
+            <span class="dot" :class="{'active' : currentShow === 'lyric'}"></span>
+          </div>
           <div class="progress-bar">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
@@ -118,8 +126,12 @@
         currentTime: 0,
         radius: 32,
         currentLyric: null,  // 初始化当前的歌词
-        currentLineNum: 0 // 当前应该高亮的歌词
+        currentLineNum: 0, // 当前应该高亮的歌词
+        currentShow: 'cd'
       }
+    },
+    created() {
+      this.touch = {}
     },
     computed: {
       cdCls () { // cd加旋转类抑或停止旋转类也由播放状态决定
@@ -327,6 +339,37 @@
           this.$refs.lyricList.scrollTo(0, 0, 1000) // 小于5行不用滚动 置顶
         }
       },
+      middleTouchStart(e) {
+        this.touch.initiated = true
+        const touch = e.touches[0]
+        this.touch.startX = touch.pageX
+        this.touch.startY = touch.pageY
+      },
+      middleTouchMove(e) {
+        if (!this.touch.initiated) {
+          return
+        }
+
+        const touch = e.touches[0]
+        const deltaX = touch.pageX - this.touch.startX
+        const deltaY = touch.pageY - this.touch.startY
+
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+          return  // 说明想滚动歌词而不是左右切换
+        }
+
+        const left = this.currentShow === 'cd' ? 0 : -window.innerWidth // 相当于屏幕右边缘
+        // 从右往左划 width为负值 划到最左端 等于-window.innerWidth 不能小于这个值
+        // Math.max使得width在0到-window.innerWidth这个区间运动(左边界处理)
+        // Math.min是右边界处理
+        const width = Math.min(Math.max(-window.innerWidth, left + deltaX), 0)  // 拿到middle-r在滚动过程中距离右侧的宽度
+        // 'cd'时,left为0 deltaX为负(左划) 绝对值越来越大,离右边缘越来越远
+        // 'lyric'时,left为(-window.innerWidth) deltaX为正(右划) 绝对值越来越小 离右边缘越来越近
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${width}px, 0, 0)`
+      },
+      middleTouchEnd() {
+
+      },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
         setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
@@ -471,6 +514,21 @@
         position: absolute
         bottom: 50px
         width: 100%
+        .dot-wrapper
+          text-align: center
+          font-size: 0  // 抹平空格造成的间距
+          .dot
+            display: inline-block
+            vertical-align: middle
+            margin: 0 4px
+            width: 8px
+            height: 8px
+            border-radius: 50%
+            background: $color-text-l
+            &.active
+              width: 20px
+              border-radius: 5px
+              background: $color-text-ll
         .progress-bar
           display: flex
           align-items: center
