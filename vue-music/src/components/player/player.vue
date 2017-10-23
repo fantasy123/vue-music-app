@@ -27,6 +27,19 @@
               </div>
             </div>
           </div>
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+            <!--整个middle-r可以滚动 currentLyric初始化为null,所以要作存在性判断-->
+            <!--:data的作用是数据发生变化的时候,scroll组件可以自动调用refresh方法-->
+              <div class="lyric-wrapper">
+                <div v-if="currentLyric">
+                  <p class="text"
+                     ref="lyricLine"
+                     :class="{'current': currentLineNum === index}"
+                     v-for="(line,index) in currentLyric.lines"
+                  >{{line.txt}}</p>
+                </div>
+              </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="progress-bar">
@@ -95,6 +108,7 @@
   import { playMode } from 'common/js/config'
   import { shuffle } from 'common/js/util'
   import Lyric from 'lyric-parser'  // 是一个class
+  import Scroll from 'base/scroll/scroll'
 
   const transform = prefixStyle('transform')
 
@@ -103,7 +117,8 @@
       return {
         currentTime: 0,
         radius: 32,
-        currentLyric: null  // 初始化当前的歌词
+        currentLyric: null,  // 初始化当前的歌词
+        currentLineNum: 0 // 当前应该高亮的歌词
       }
     },
     computed: {
@@ -293,9 +308,24 @@
       },
       _getlyric() {
         this.currentSong.getlyric().then((lyric) => { // 还可以接收一个回调函数 进行更细致的操作
-          this.processedLyric = new Lyric(lyric)  // 传入Song类的getlyric方法得到的歌词 构造一个规范化各行歌词信息的歌词实例
-          console.log(this.processedLyric)
+          this.currentLyric = new Lyric(lyric, this.handleLyric)  // 传入Song类的getlyric方法得到的歌词 构造一个规范化各行歌词信息的歌词实例
+
+          if (this.playing) { // 如果歌曲正在播放
+            this.currentLyric.play()  // 播放歌词(歌词实例对象的play方法)
+          }
         })
+      },
+      handleLyric({lineNum, txt}) { // 歌词每一行发生改变时的回调
+        // 不断标记当前播放的行
+        this.currentLineNum = lineNum
+        // 歌词play后,lineNum不断更新,所以currentLineNum不断更新,它与序号为index的line匹配时,该行高亮
+
+        if (lineNum > 5) {  // 手动滚动到歌词其他地方 当每行歌词改变,回调执行的时候 还是会滚到当前播放的区域
+          let targetEle = this.$refs.lyricLine[lineNum - 5]  // 所有行组成一个数组
+          this.$refs.lyricList.scrollToElement(targetEle, 1000) // 操作scroll滚动,使高亮歌词始终垂直居中 有1个1秒的过渡动画
+        } else {
+          this.$refs.lyricList.scrollTo(0, 0, 1000) // 小于5行不用滚动 置顶
+        }
       },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
@@ -328,7 +358,8 @@
     },
     components: {
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Scroll
     }
   }
 </script>
@@ -419,6 +450,23 @@
                 position: absolute
                 top: 0
                 left: 0
+        .middle-r
+          display: inline-block
+          vertical-align: top
+          width: 100%
+          height: 100%
+          overflow: hidden
+          .lyric-wrapper
+            width: 80%
+            margin: 0 auto
+            overflow: hidden
+            text-align: center
+            .text
+              line-height: 32px
+              color: $color-text-l
+              font-size: $font-size-medium
+              &.current
+                color: $color-text
       .bottom
         position: absolute
         bottom: 50px
