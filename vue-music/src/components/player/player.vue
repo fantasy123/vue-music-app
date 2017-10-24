@@ -24,7 +24,7 @@
               @touchmove.prevent="middleTouchMove"
               @touchend="middleTouchEnd"
         >
-          <div class="middle-l">
+          <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.image">
@@ -119,6 +119,7 @@
   import Scroll from 'base/scroll/scroll'
 
   const transform = prefixStyle('transform')
+  const transitionDuration = prefixStyle('transitionDuration')
 
   export default {
     data () {
@@ -362,13 +363,48 @@
         // 从右往左划 width为负值 划到最左端 等于-window.innerWidth 不能小于这个值
         // Math.max使得width在0到-window.innerWidth这个区间运动(左边界处理)
         // Math.min是右边界处理
-        const width = Math.min(Math.max(-window.innerWidth, left + deltaX), 0)  // 拿到middle-r在滚动过程中距离右侧的宽度
+        const offsetWidth = Math.min(Math.max(-window.innerWidth, left + deltaX), 0)  // 拿到middle-r在滚动过程中距离右侧的宽度
         // 'cd'时,left为0 deltaX为负(左划) 绝对值越来越大,离右边缘越来越远
         // 'lyric'时,left为(-window.innerWidth) deltaX为正(右划) 绝对值越来越小 离右边缘越来越近
-        this.$refs.lyricList.$el.style[transform] = `translate3d(${width}px, 0, 0)`
-      },
-      middleTouchEnd() {
+        this.touch.percent = Math.abs(offsetWidth / window.innerWidth)  // 滑动距离占屏幕宽度的比例
 
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+        this.$refs.lyricList.$el.style[transitionDuration] = 0
+
+        this.$refs.middleL.style.opacity = 1 - this.touch.percent // 左划 percent↑opacity↓ 右划 percent↓ opacity↑
+        this.$refs.middleL.style[transitionDuration] = 0  // 不是组件 不用$el
+      },
+      middleTouchEnd() {  // 决定歌词本停在哪个位置
+        // offsetWidth是歌词本左边缘到屏幕右端的距离
+        let offsetWidth
+        let opacity
+
+        if (this.currentShow === 'cd') {  // 从右向左划
+          if (this.touch.percent > 0.1) {
+            offsetWidth = -window.innerWidth  // 贴左
+            this.currentShow = 'lyric'
+            opacity = 0
+          } else {
+            offsetWidth = 0 // 归位
+            opacity = 1
+          }
+        } else {  // 从左向右划
+          if (this.touch.percent < 0.9) { // 滑动距离>0.1
+            offsetWidth = 0 // 贴右
+            this.currentShow = 'cd'
+            opacity = 1
+          } else {
+            offsetWidth = -window.innerWidth  // 归位
+            opacity = 0
+          }
+        }
+
+        const time = 300  // 设定缓动时间
+        this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+        this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+
+        this.$refs.middleL.style.opacity = opacity  // 最后统一设置
+        this.$refs.middleL.style[transitionDuration] = `${time}ms`  // middleL透明度和歌词本位移缓动时间相同
       },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
