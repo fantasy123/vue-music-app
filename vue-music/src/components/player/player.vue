@@ -30,6 +30,9 @@
                 <img class="image" :src="currentSong.image">
               </div>
             </div>
+            <div class="playing-lyric-wrapper">
+              <div class="playing-lyric">{{playingLyric}}</div>
+            </div>
           </div>
           <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
             <!--整个middle-r可以滚动 currentLyric初始化为null,所以要作存在性判断-->
@@ -128,7 +131,8 @@
         radius: 32,
         currentLyric: null,  // 初始化当前的歌词
         currentLineNum: 0, // 当前应该高亮的歌词
-        currentShow: 'cd'
+        currentShow: 'cd',
+        playingLyric: ''  // 在cd下面,当前播放的那句歌词
       }
     },
     created() {
@@ -245,32 +249,46 @@
         this.setFullScreen(true)  // 不能直接设置fullScreen为true 要对vuex数据进行全局操作
       },
       togglePlaying () {
-        this.setPlayingState(!this.playing) // 操作vuex数据 仅仅设置playing不能取反 真正控制音乐播放的是播放器 要调用audio的play和pause方法
+        this.setPlayingState(!this.playing) // 仅仅设置playing不能真正影响播放状态
+        // 要调用audio的play和pause方法
+
+        if (this.currentLyric) {  // 点击暂停按钮 歌曲播放暂停 歌词仍在播放
+          this.currentLyric.togglePlay()  // 同步切换歌词播放状态 使和歌曲播放同步
+        }
       },
       next () {
-        let index = this.currentIndex + 1
+        if (this.playList.length === 1) { // 加上列表只有1首歌时的边界判断
+          this.loop()
+        } else {
+          let index = this.currentIndex + 1 // 只有1首歌currentIndex必为0 index为1
 
-        if (index === this.playList.length) {
-          index = 0 // 切回第一首
-        }
+          if (index === this.playList.length) { // 1 === 1满足
+            index = 0 // 切回第一首  index置回0
+          }
 
-        this.setCurrentIndex(index)
+          this.setCurrentIndex(index) // 也就是点了next按钮 index没有变 playList只有一首也不会变 所以currentSong也不会变
+          // currentSong不变 后面的逻辑无从谈起
 
-        if (!this.playing) {  // 没有在播放
-          this.togglePlaying()  // 切歌一定是默认播放的
+          if (!this.playing) {  // 没有在播放
+            this.togglePlaying()  // 切歌一定是默认播放的
+          }
         }
       },
       prev () {
-        let index = this.currentIndex - 1
+        if (this.playList.length === 1) {
+          this.loop()
+        } else {
+          let index = this.currentIndex - 1
 
-        if (index === -1) { // 从第一首歌往前退
-          index = this.playList.length - 1  // 切到最后一首
-        }
+          if (index === -1) { // 从第一首歌往前退
+            index = this.playList.length - 1  // 切到最后一首
+          }
 
-        this.setCurrentIndex(index) // 修改currentIndex=>计算出currentSong=>currentSong变化触发audio的play方法=>播放新的歌曲
+          this.setCurrentIndex(index) // 修改currentIndex=>计算出currentSong=>currentSong变化触发audio的play方法=>播放新的歌曲
 
-        if (!this.playing) {
-          this.togglePlaying()
+          if (!this.playing) {
+            this.togglePlaying()
+          }
         }
       },
       end () {
@@ -282,14 +300,23 @@
         }
       },
       loop () {
-        this.$refs.audio.currentTime = 0
+        this.$refs.audio.currentTime = 0  // 歌曲播放进度复位
         this.$refs.audio.play()
+
+        if (this.currentLyric) {
+          this.currentLyric.seek(0) // 歌词同步复位
+        }
       },
       onProgressBarChange (percent) {
-        this.$refs.audio.currentTime = this.currentSong.duration * percent  // 由新percent反推currentTime(计算最底层的数据,驱动其他数据)
+        const currentTime = this.currentSong.duration * percent // 由新percent反推currentTime(计算最底层的数据,驱动其他数据)
+        this.$refs.audio.currentTime = currentTime
 
         if (!this.playing) {
           this.togglePlaying()  // 拖动结束 要继续播放(无论原先是暂停还是播放)
+        }
+        // 实现拖动进度条操作歌词
+        if (this.currentLyric) {
+          this.currentLyric.seek(currentTime * 1000)
         }
       },
       changeMode () {
@@ -326,6 +353,10 @@
           if (this.playing) { // 如果歌曲正在播放
             this.currentLyric.play()  // 播放歌词(歌词实例对象的play方法)
           }
+        }).catch(() => {  // 错误情况下(获取不到歌词)的清理操作
+          this.currentLyric = null  // 歌词对象置空
+          this.playingLyric = ''
+          this.currentLineNum = 0
         })
       },
       handleLyric({lineNum, txt}) { // 歌词每一行发生改变时的回调
@@ -339,6 +370,8 @@
         } else {
           this.$refs.lyricList.scrollTo(0, 0, 1000) // 小于5行不用滚动 置顶
         }
+
+        this.playingLyric = txt
       },
       middleTouchStart(e) {
         this.touch.initiated = true
@@ -366,7 +399,7 @@
         const offsetWidth = Math.min(Math.max(-window.innerWidth, left + deltaX), 0)  // 拿到middle-r在滚动过程中距离右侧的宽度
         // 'cd'时,left为0 deltaX为负(左划) 绝对值越来越大,离右边缘越来越远
         // 'lyric'时,left为(-window.innerWidth) deltaX为正(右划) 绝对值越来越小 离右边缘越来越近
-        this.touch.percent = Math.abs(offsetWidth / window.innerWidth)  // 滑动距离占屏幕宽度的比例
+        this.touch.percent = Math.abs(offsetWidth / window.innerWidth)  // 歌词本左端到屏幕右端距离占屏幕宽度的比例
 
         this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
         this.$refs.lyricList.$el.style[transitionDuration] = 0
@@ -420,10 +453,15 @@
           return // id没变 什么都不做
         }
 
-        this.$nextTick(() => {  // DOM ready
+        if (this.currentLyric) {
+          this.currentLyric.stop()  // 清除上一首歌歌词的计时器 防止歌词不规律跳动
+        }
+
+        // 微信里运行 切到后台 JS无法执行 但audio可以把当前这首歌播放完 触发end的时候 end的回调JS就不会被执行
+        setTimeout(() => {
           this.$refs.audio.play()
-          this._getlyric() // 歌曲播放立刻加载歌词
-        })
+          this._getlyric() // 歌曲播放立刻加载歌词  每次currentSong改变 都会new Lyric() 开启一个计时器
+        }, 1000)
       },
       // 歌曲暂停状态下切换播放模式的时候 currentIndex和playList同时改变,currentSong也改变(只是id没有变)
       // 所以会触发play 这是我们不希望看到的
@@ -529,6 +567,16 @@
                 position: absolute
                 top: 0
                 left: 0
+          .playing-lyric-wrapper
+            width: 80%
+            margin: 30px auto 0 auto
+            overflow: hidden
+            text-align: center
+            .playing-lyric
+              height: 20px
+              line-height: 20px
+              color: $color-text-l
+              font-size: $font-size-medium
         .middle-r
           display: inline-block
           vertical-align: top
