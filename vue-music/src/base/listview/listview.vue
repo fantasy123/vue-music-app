@@ -85,6 +85,10 @@
       }
     },
     methods: {
+      refresh() { // 给listview组件暴露一个refresh接口(本质上是调用它依赖的scroll组件的refresh API)
+        // 这样父组件可以直接取到listview组件调用这个暴露出的刷新方法
+        this.$refs.listview.refresh()
+      },
       selectItem(item) { // 负责将事件派发出去给调用它的组件 不涉及任何业务逻辑
         // item作为参数传递出去 让调用它的组件知道点击了哪个元素
         this.$emit('select', item)

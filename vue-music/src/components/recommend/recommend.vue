@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
     <!--prpos down 令scroll组件监听歌单列表数据的变化 动态刷新 重新计算高度-->
     <scroll class="recommend-content" :data="discList" ref="scroll">
       <!--better-scroll只能滚动第一个子元素 所以有2个元素时需要拿一个div包起来-->
@@ -51,8 +51,10 @@
   import Slider from 'base/slider/slider'
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
+  import {playlistMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playlistMixin],
     data () {
       return {
         recommends: [],
@@ -69,6 +71,11 @@
       // slider的高度完全依赖图片撑开 所以还是可能计算不对
     },
     methods: {
+      handlePlayList(playlist) {
+        const bot = playlist.length > 0 ? '60px' : ''
+        this.$refs.recommend.style.bottom = bot // recommend是fix定位
+        this.$refs.scroll.refresh()
+      },
       _getRecommend() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {

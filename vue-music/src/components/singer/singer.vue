@@ -1,7 +1,7 @@
 <template>
-  <div class="singer">
+  <div class="singer" ref="singer">
     <!--监听listview组件派发的select事件,写回调-->
-    <list-view :data="singers" @select="selectSinger"></list-view>
+    <list-view :data="singers" @select="selectSinger" ref="list"></list-view>
     <!--ListView(JS)对应list-view(html里)  Listview对应listview-->
     <router-view></router-view>
     <!--承载子路由 歌手详情页(默认隐藏) 点击列表元素时根据id跳转到对应子路由-->
@@ -16,11 +16,13 @@
   import ListView from 'base/listview/listview'
   // vuex提供的语法糖(节省代码量)  改变state
   import {mapMutations} from 'vuex' // 对mutation进行一次封装
+  import {playlistMixin} from 'common/js/mixin'
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LIST_LEN = 10
 
   export default {
+    mixins: [playlistMixin],
     data() {
       return {
         singers: []
@@ -30,6 +32,11 @@
       this._getSingerList()
     },
     methods: {
+      handlePlayList(playlist) {
+        const bot = playlist.length > 0 ? '60px' : ''
+        this.$refs.singer.style.bottom = bot  // singer这个div是fix定位 包裹着一个scroll组件
+        this.$refs.list.refresh()  // 这里的listview组件依赖一个<scroll></scroll>
+      },
       selectSinger(singer) {  // 接收一个singer的实例
         // 跳转路由
         this.$router.push({

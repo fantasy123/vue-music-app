@@ -36,6 +36,7 @@
   import Loading from 'base/loading/loading'
   import {prefixStyle} from 'common/js/dom' // 根据浏览器支持情况得到相应的CSS样式 不需要去写多余的
   import {mapActions} from 'vuex'
+  import {playlistMixin} from 'common/js/mixin'
 
   const RESERVED_HEIGHT = 40  // 预留高度
 
@@ -43,6 +44,7 @@
   const backdrop = prefixStyle('backdrop-filter') // 根据浏览器能力拼接好的样式存在变量里
 
   export default {
+    mixins: [playlistMixin],  // 这段代码插入组件代码 发生merge行为 组件的同名方法会覆盖掉mixin的
     props: {
       bgImage: {
         type: String,
@@ -72,6 +74,12 @@
       }
     },
     methods: {
+      handlePlayList(playlist) {  // mixin中 : mounted , activated 和 watch里都调用了这个方法 确保bottom值设置正确
+        // 插入的mixin通过mapGetters得到了this.playList 传入这个方法
+        const bottom = playlist.length > 0 ? '60px' : ''  // 有歌曲在播放=>有miniPlayer=>scroll加一个bottom值 没有歌曲播放就不加
+        this.$refs.list.$el.style.bottom = bottom // 组件需要加$el取到它的元素
+        this.$refs.list.refresh() // 重新计算scroll的高度
+      },
       scroll(pos) { // 参数是position对象
         this.scrollY = pos.y  // 实时给scrollY赋值
       },
