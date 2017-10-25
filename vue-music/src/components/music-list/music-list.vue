@@ -50,10 +50,10 @@
         type: String,
         default: ''
       },
-      title: {
+      title: {  // 接收来自disc组件的传值 填充本组件除song-list组件以外的部分
         type: String,
         default: ''
-      },
+      },  // 路由间的数据通讯,vuex作为桥梁:歌单列表页点击 设置disc 歌单详情页获取数据并填充
       songs: {
         type: Array,
         default: []

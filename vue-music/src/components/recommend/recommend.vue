@@ -24,7 +24,8 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
-            <li v-for="item in discList" class="item">
+            <li v-for="item in discList" class="item" @click="selectItem(item)">
+              <!-- 传入歌单列表的每个数据=>item -->
               <div class="icon">
                 <img width="60" height="60" v-lazy="item.imgurl">
                 <!--先加载默认炸鸡图片(from memory cache) 再加载真实图片(from disk cache)-->
@@ -42,6 +43,8 @@
         <loading></loading>
       </div>
     </scroll>
+    <router-view></router-view>
+    <!--这个router-view是二级路由的容器,disc组件从右侧划入整屏覆盖-->
   </div>
 </template>
 
@@ -52,6 +55,7 @@
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
   import {playlistMixin} from 'common/js/mixin'
+  import {mapMutations} from 'vuex'
 
   export default {
     mixins: [playlistMixin],
@@ -71,32 +75,43 @@
       // slider的高度完全依赖图片撑开 所以还是可能计算不对
     },
     methods: {
-      handlePlayList(playlist) {
+      selectItem (item) {
+        // 通过vue-router的API去跳转
+        this.$router.push({
+          path: `/recommend/${item.dissid}` // 路由映射关系在router/index.js里
+        })
+        // 跳转的时候通过mutation在vuex数据中心set这个disc(到详情页再读取)
+        this.setDisc(item)  // 这就把disc写到了store里 更改了state里面的disc
+      },
+      handlePlayList (playlist) {
         const bot = playlist.length > 0 ? '60px' : ''
         this.$refs.recommend.style.bottom = bot // recommend是fix定位
         this.$refs.scroll.refresh()
       },
-      _getRecommend() {
+      _getRecommend () {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
             this.recommends = res.data.slider
           }
         })
       },
-      _getDiscList() {
+      _getDiscList () {
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
             this.discList = res.data.list
           }
         })
       },
-      loadImage() { // 图片加载完成触发的事件(轮播图图片已经延迟了2秒) 此刻可以保证recommends获取成功 slide被撑开 discList获取成功 列表被撑开
+      loadImage () { // 图片加载完成触发的事件(轮播图图片已经延迟了2秒) 此刻可以保证recommends获取成功 slide被撑开 discList获取成功 列表被撑开
         if (!this.checkLoaded) {  // (!undefined == true)
           // 图片有多张 会多次触发loadImage事件 可以设定标志位确保逻辑只执行一次
           this.$refs.scroll.refresh() // 先取得该scroll组件 调用它代理的refresh方法 进而调用scroll原生的refresh方法
           this.checkLoaded = true // 置为true 下一张图片加载的时候不再refresh(一张图片足以撑开slider)
         }
-      }
+      },
+      ...mapMutations({
+        setDisc: 'SET_DISC' // 设定一个语义化的方法名供全局调用 (映射mutation里面的方法)
+      })
     },
     components: {
       Slider,

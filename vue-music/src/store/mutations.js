@@ -23,6 +23,10 @@ const mutations = { // 与actions不同的是 它是同步修改状态 没有任
   },
   [types.SET_CURRENT_INDEX](state, index) {
     state.currentIndex = index
+  },
+  [types.SET_DISC](state, disc) {
+    state.disc = disc // state.prop = val 左边是state.js里state对象的属性
+    // 右边是调用这个mutation函数时传入的值,可以任意命名
   }
 }
 
