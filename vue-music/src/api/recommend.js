@@ -38,3 +38,20 @@ export function getDiscList () {  // 获取歌单数据 (前端部分) qq服务�
     return Promise.resolve(res.data)  // 返回一个promise对象  recommend.vue里调用
   })
 }
+
+export function getSongList(disstid) {
+  const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+
+  const data = Object.assign({}, commonParams, {
+    disstid,
+    type: 1,
+    json: 1,
+    utf8: 1,
+    onlysong: 0,
+    platform: 'yqq',
+    hostUin: 0,
+    needNewCode: 0
+  })
+
+  return jsonp(url, data, options)
+}

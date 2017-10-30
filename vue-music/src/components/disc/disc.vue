@@ -11,6 +11,8 @@
   // 这个组件是一个二级路由
   import MusicList from 'components/music-list/music-list'
   import {mapGetters} from 'vuex'
+  import {getSongList} from 'api/recommend'
+  import {ERR_OK} from 'api/config'
 
   export default {
     computed: {
@@ -24,6 +26,23 @@
         'disc'  // 歌单详情页里接收数据(this.disc)
         // 接着读取this.disc里面的数据,传给disc的music-list子组件来填充页面(props down)
       ])
+    },
+    created() {
+      this._getSongList()
+    },
+    methods: {
+      _getSongList() {
+        if (!this.disc.dissid) {
+          this.$router.push('/recommend')
+          return
+        }
+
+        getSongList(this.disc.dissid).then((res) => {
+          if (res.code === ERR_OK) {
+            console.log(res.cdlist[0].songlist)
+          }
+        })
+      }
     },
     components: {
       MusicList
