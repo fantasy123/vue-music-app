@@ -1,7 +1,7 @@
 <!--与singer-detail和disc级别相同-->
 <template>
   <transition name="slide">
-    <music-list :title="title" :bgImage="bgImage" :songs="songs"></music-list>
+    <music-list :title="title" :bgImage="bgImage" :songs="songs" :rank="rank"></music-list>
     <!--所有复用music-list组件的父组件都要传入这2个数据:标题和头图-->
     <!--songs额外抓取-->
   </transition>
@@ -17,7 +17,8 @@
   export default {
     data() {
       return {
-        songs: [] // 定义songs接收歌曲数据
+        songs: [], // 定义songs接收歌曲数据
+        rank: true
       }
     },
     computed: {
@@ -47,7 +48,7 @@
 
           return
         }
-        
+
         getMusicList(this.topList.id).then((res) => {
           if (res.code === ERR_OK) {
             this.songs = this._normalizeSongs(res.songlist)
