@@ -2,7 +2,7 @@
   <div class="rank" ref="rank">
     <scroll class="toplist" :data="topList" ref="toplist">
       <ul>
-        <li class="item" v-for="item in topList">
+        <li class="item" v-for="item in topList" @click="selectItem(item)">
           <div class="icon">
             <img width="100" height="100" v-lazy="item.picUrl">
           </div>
@@ -20,6 +20,7 @@
       </div>
     </scroll>
     <router-view></router-view>
+    <!--topList横向划入,覆盖整屏-->
   </div>
 </template>
 
@@ -29,6 +30,7 @@
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
   import {playlistMixin} from 'common/js/mixin'
+  import {mapMutations} from 'vuex'
 
   export default {
     mixins: [playlistMixin],
@@ -41,6 +43,15 @@
       this._getTopList()
     },
     methods: {
+      selectItem(item) {  // 点击: 1.根据item.id实现路由跳转 2.设置vuex数据,跳转成功后再取数据
+        const id = item.id
+
+        this.$router.push({
+          path: `/rank/${id}`
+        })
+
+        this.setTopList(item) // 把一个排行榜对象写到vuex数据里
+      },
       handlePlayList(playlist) {
         const bottom = playlist.length ? '60px' : ''
         this.$refs.rank.style.bottom = bottom
@@ -52,7 +63,10 @@
             this.topList = res.data.topList
           }
         })
-      }
+      },
+      ...mapMutations({
+        setTopList: 'SET_TOP_LIST'
+      })
     },
     components: {
       Scroll,

@@ -1,3 +1,4 @@
+<!--music-list数据分2部分:title和bgImage;songList的数据-->
 <template>
   <div class="music-list">
     <div class="back" @click="back">

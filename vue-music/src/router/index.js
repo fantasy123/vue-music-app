@@ -6,6 +6,7 @@ import Search from 'components/search/search'
 import Singer from 'components/singer/singer'
 import SingerDetail from 'components/singer-detail/singer-detail' // 路由是由组件来承载
 import Disc from 'components/disc/disc'
+import TopList from 'components/top-list/top-list'
 
 Vue.use(Router) // 注册路由
 
@@ -27,7 +28,13 @@ export default new Router({ // 暴露一个Router的实例
     },
     {
       path: '/rank',
-      component: Rank // 组件填充路径
+      component: Rank, // 组件填充路径
+      children: [
+        {
+          path: ':id',
+          component: TopList
+        }
+      ]
     },
     {
       path: '/search',
