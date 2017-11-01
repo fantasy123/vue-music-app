@@ -27,6 +27,10 @@
         // 刷新这个行为应写在scroll组件里而不是引用它的地方
         type: Array,
         default: null
+      },
+      pullup: { // 扩展一个上拉刷新的标志位
+        type: Boolean,
+        default: false
       }
     },
     mounted () {  // dom ready
@@ -51,6 +55,14 @@
           this.scroll.on('scroll', (pos) => {
             me.$emit('scroll', pos) // 内部的this默认为this.scroll本身 而我们需要的是Vue实例
             // 在外部监听scroll事件拿到位置对象(包含x和y周坐标属性)
+          })
+        }
+
+        if (this.pullup) {  // 上拉刷新开启
+          this.scroll.on('scrollEnd', () => { // 监听滚动终止事件
+            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {  // 快要滚动到底部(50是缓冲)
+              this.$emit('scrollToEnd') // 在合适的时机派发一个事件 不做任何业务逻辑
+            }
           })
         }
       },

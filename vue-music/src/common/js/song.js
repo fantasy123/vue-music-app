@@ -53,7 +53,7 @@ export function createSong (musicData) {
 }
 
 // 处理联合演唱的歌手列表(歌手与歌手之间用斜线分开)
-export function filterSinger (singer) {  // 传入一个singer数组
+function filterSinger (singer) {  // 传入一个singer数组 这个函数是歌曲相关的 本身就是一个内部函数 不适合暴露出来
   let ret = []
 
   if (!singer) {  // 边界
