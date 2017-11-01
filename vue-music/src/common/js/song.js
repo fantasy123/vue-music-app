@@ -53,7 +53,7 @@ export function createSong (musicData) {
 }
 
 // 处理联合演唱的歌手列表(歌手与歌手之间用斜线分开)
-function filterSinger (singer) {  // 传入一个singer数组
+export function filterSinger (singer) {  // 传入一个singer数组
   let ret = []
 
   if (!singer) {  // 边界
