@@ -57,6 +57,11 @@ export const insertSong = function ({commit, state}, song) {  // song是待插�
   playList.splice(currentIndex, 0, song)  // 插入歌曲 (先查找再插入,否则fpIndex永远不为-1)
 
   if (fpIndex > -1) { // 已经包含了这首歌
-
+    if (currentIndex > fpIndex) { // 当前插入的序号大于列表中的序号
+      playList.splice(fpIndex, 1)
+      // currentIndex--
+    } else {
+      playList.splice(fpIndex + 1, 1)
+    }
   }
 }
