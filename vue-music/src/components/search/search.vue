@@ -19,6 +19,8 @@
     <div class="search-result" v-show="query">
       <suggest :query="query"></suggest>
     </div>
+    <router-view></router-view>
+    <!--歌手详情页作为search组件的二级路由 点击是在search组件的子组件suggest组件里做-->
   </div>
 </template>
 

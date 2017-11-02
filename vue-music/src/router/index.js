@@ -38,7 +38,13 @@ export default new Router({ // 暴露一个Router的实例
     },
     {
       path: '/search',
-      component: Search
+      component: Search,
+      children: [
+        {
+          path: ':id',
+          component: SingerDetail
+        }
+      ]
     },
     {// 树状结构
       path: '/singer',

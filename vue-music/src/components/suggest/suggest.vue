@@ -7,7 +7,7 @@
   >
     <!--suggest 是整个组件的包裹层-->
     <ul class="suggest-list">
-      <li class="suggest-item" v-for="item in result">
+      <li class="suggest-item" v-for="item in result" @click="selectItem(item)">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
           <!--根据item里面的type决定icon是表示歌手还是表示歌曲-->
@@ -27,6 +27,8 @@
   import {ERR_OK} from 'api/config'
   import {search} from 'api/search'
   import {createSong} from 'common/js/song' // 这个函数关联了Song类和filterSong方法
+  import Singer from 'common/js/singer' // 歌手构造器  引入类不需要加括号
+  import {mapMutations} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
 
@@ -48,7 +50,7 @@
     data() {
       return {
         page: 1, // 默认是第一页 先考虑首次请求
-        result: [],  // 接收检索数据
+        result: [],  // 接收检 索数据
         hasMore: true, // 标志位:判断是否加载完
         pullup: true  // 上拉刷新流程:
         // suggest组件把pullup设为true,props down => scroll组件的prop接收到pullup,监听scrollEnd事件=>判断是否滚动到底部,派发scrollToEnd事件
@@ -58,6 +60,23 @@
       }
     },
     methods: {
+      selectItem(item) {  // 点击检索建议的歌手 跳到歌手详情页
+        // 依然需要mapMutation写入数据 在singer-detail读出数据
+        // 如果是歌手
+        if (item.type === TYPE_SINGER) {
+          const singer = new Singer({ // 构造singer实例
+            id: item.singermid,
+            name: item.singername
+          })
+
+          this.$router.push({
+            path: `/search/${singer.id}`  // search和歌手详情页的二级路由关系在router/js里已建立
+          })
+
+          // 写入数据
+          this.setSinger(singer)  // 将singer写入state下的singer了
+        }
+      },
       _search() {  // 请求服务端的逻辑 只在监听到query变化的时候调用一次 后面取数据是通过监听scroll事件调用searchMore
         this.page = 1 // 改变query时,要重置到第一页
         this.$refs.suggest.scrollTo(0, 0) // 改变query时,要滚动到顶部
@@ -123,11 +142,14 @@
       },
       getDisplayName(item) {
         if (item.type === TYPE_SINGER) {
-          return item.singer  // data.zhida这个对象有合并到ret中
+          return item.singername  // data.zhida这个对象有合并到ret中
         } else {  // 需要歌曲名-歌手列表名(singer是一个数组)
           return `${item.name}-${item.singer}`  // 后面不再需要调用filterSinger 因为singer的格式化在createSong的时候就已经被处理了
         }
-      }
+      },
+      ...mapMutations({
+        setSinger: 'SET_SINGER'
+      })
     },
     watch: {
       query() { // query发生变化时(父组件search把query派发下来),调用服务端接口,检索数据,渲染到列表里

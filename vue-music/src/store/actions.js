@@ -1,6 +1,7 @@
 import * as types from './mutation-types'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import { currentIndex } from './getters'
 
 function findIndex (list, song) { // 从list中找到song对应的索引
   return list.findIndex((item) => {
@@ -39,4 +40,23 @@ export const randomPlay = function ({commit}, {list}) { // 没有选择具体的
   commit(types.SET_CURRENT_INDEX, 0)  // 从随机列表的第一个开始播放
   commit(types.SET_FULL_SCREEN, true) // 依然需要展开播放器
   commit(types.SET_PLAYING_STATE, true) // 开始播放
+}
+
+// 检索结果页,点击一首歌曲 向当前播放列表添加该歌曲 需要操作3个mutation 所以封装成一个action
+export const insertSong = function ({commit, state}, song) {  // song是待插入的歌曲
+  let playList = state.playList
+  // let sequenceList = state.sequenceList
+  // let currentIndex = state.currentIndex // 通过state拿到三个数据
+
+  // 编写逻辑对3个数据做修改
+
+  // let currentSong = playList[currentIndex]  // 记录当前正在播放的歌曲
+  let fpIndex = findIndex(playList, song) // 插入之前要判断当前播放列表是否有待插入的歌曲并返回其索引
+
+  // currentIndex++ // 要插入的位置是当前索引的下一个
+  playList.splice(currentIndex, 0, song)  // 插入歌曲 (先查找再插入,否则fpIndex永远不为-1)
+
+  if (fpIndex > -1) { // 已经包含了这首歌
+
+  }
 }
