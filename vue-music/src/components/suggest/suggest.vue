@@ -28,7 +28,7 @@
   import {search} from 'api/search'
   import {createSong} from 'common/js/song' // 这个函数关联了Song类和filterSong方法
   import Singer from 'common/js/singer' // 歌手构造器  引入类不需要加括号
-  import {mapMutations} from 'vuex'
+  import {mapMutations, mapActions} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
 
@@ -75,6 +75,8 @@
 
           // 写入数据
           this.setSinger(singer)  // 将singer写入state下的singer了
+        } else {  // 如果是歌曲
+          this.insertSong(item) // item就是Song的实例
         }
       },
       _search() {  // 请求服务端的逻辑 只在监听到query变化的时候调用一次 后面取数据是通过监听scroll事件调用searchMore
@@ -149,7 +151,10 @@
       },
       ...mapMutations({
         setSinger: 'SET_SINGER'
-      })
+      }),
+      ...mapActions([
+        'insertSong'  // 字符串数组
+      ])
     },
     watch: {
       query() { // query发生变化时(父组件search把query派发下来),调用服务端接口,检索数据,渲染到列表里
