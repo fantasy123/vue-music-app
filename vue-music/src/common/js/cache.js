@@ -37,3 +37,7 @@ export function saveSearch (query) {  // 传入当前query,返回新数组
 
   return searches // 新数组作为返回值 用来改变vuex数据 更新state
 }
+
+export function loadSearch () {
+  return storage.get(SEARCH_KEY, [])  // 读取本地 如果一次也没有存储过 返回一个空数组
+}
