@@ -76,3 +76,19 @@ export function Base64 () {
   }
 }
 
+// 输入框截流函数 防止频繁发送无效请求 节约流量
+export function debounce (func, delay) { // 待截流的函数, 延迟时间
+  let timer
+
+  return function (...args) { // 函数柯里化,调用一个函数,返回另一个函数
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    timer = setTimeout(() => {  // debounce快速执行时,返回的函数也快速多次调用
+      // 里面的要截流的func函数在delay时间内只会调用一次
+      func.apply(this, args)
+    }, delay)
+  }
+}
+

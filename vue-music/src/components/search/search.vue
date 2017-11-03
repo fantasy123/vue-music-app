@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-      <suggest :query="query"></suggest>
+      <suggest :query="query" @listScroll="blurInput"></suggest>
     </div>
     <router-view></router-view>
     <!--歌手详情页作为search组件的二级路由 点击是在search组件的子组件suggest组件里做-->
@@ -53,6 +53,9 @@
       },
       onQueryChange(query) { // 响应search-box派发的query事件 拿到query值 再props down给suggest组件检索服务器
         this.query = query
+      },
+      blurInput() {
+        this.$refs.searchBox.blur() // 调用子组件方法
       }
     },
     components: {

@@ -31,6 +31,10 @@
       pullup: { // 扩展一个上拉刷新的标志位
         type: Boolean,
         default: false
+      },
+      beforeScroll: { // 决定是否要监听beforeScrollStart事件的变量
+        type: Boolean,
+        default: false
       }
     },
     mounted () {  // dom ready
@@ -63,6 +67,12 @@
             if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {  // 快要滚动到底部(50是缓冲)
               this.$emit('scrollToEnd') // 在合适的时机派发一个事件 不做任何业务逻辑
             }
+          })
+        }
+
+        if (this.beforeScroll) {  // 这个scroll组件的父元素把beforeScroll值置为true再props down
+          this.scroll.on('beforeScrollStart', () => { // 监听beforeScrollStart事件(better-scroll接口,在滚动开始的时候触发)
+            this.$emit('beforeScroll')  // 向外派发一个beforeScroll事件 表示列表被滚动了
           })
         }
       },

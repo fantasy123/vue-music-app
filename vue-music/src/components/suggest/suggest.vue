@@ -2,7 +2,9 @@
   <scroll class="suggest"
           :data="result"
           :pullup="pullup"
+          :beforeScroll="beforeScroll"
           @scrollToEnd="searchMore"
+          @beforeScroll="listScroll"
           ref="suggest"
   >
     <!--suggest 是整个组件的包裹层-->
@@ -20,6 +22,10 @@
       <loading v-show="hasMore" title=""></loading>
       <!--只需要转圈,title传一个空-->
     </ul>
+    <div class="no-result-wrapper" v-show="!result.length">
+      <no-result title="抱歉,暂无搜索结果"></no-result>
+      <!--传固定值不需要v-bind,用一个普通属性即可-->
+    </div>
   </scroll>
 </template>
 
@@ -31,6 +37,7 @@
   import {mapMutations, mapActions} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
+  import NoResult from 'base/no-result/no-result'
 
   const TYPE_SINGER = 'singer'  // 语义化
   const perpage = 20  // 统一控制一页显示的条数
@@ -52,6 +59,7 @@
         page: 1, // 默认是第一页 先考虑首次请求
         result: [],  // 接收检 索数据
         hasMore: true, // 标志位:判断是否加载完
+        beforeScroll: true, // 使scroll组件监听beforeScrollStart事件
         pullup: true  // 上拉刷新流程:
         // suggest组件把pullup设为true,props down => scroll组件的prop接收到pullup,监听scrollEnd事件=>判断是否滚动到底部,派发scrollToEnd事件
         // => suggest组件监听scrollToEnd事件调用searchMore,page++请求下一页 => 新数据拼接到result上,同步DOM => scroll也接收到数据重新计算高度
@@ -149,6 +157,10 @@
           return `${item.name}-${item.singer}`  // 后面不再需要调用filterSinger 因为singer的格式化在createSong的时候就已经被处理了
         }
       },
+      listScroll() {
+        this.$emit('listScroll')  // 告诉search组件 列表滚动了 要着手失焦了(滚动组件归suggest所有 所以要经过它的传递)
+        // 不可能直接跟search-box对话 他们共有父组件search
+      },
       ...mapMutations({
         setSinger: 'SET_SINGER'
       }),
@@ -163,7 +175,8 @@
     },
     components: {
       Scroll,
-      Loading
+      Loading,
+      NoResult
     }
   }
 </script>
@@ -194,9 +207,8 @@
         overflow: hidden
         .text
           no-wrap()
-    //.no-result-wrapper
-      //position: absolute
-      //width: 100%
-      //top: 50%
-      //transform: translateY(-50%)
+    .no-result-wrapper
+      position: absolute
+      width: 100%
+      top: 20%
 </style>
