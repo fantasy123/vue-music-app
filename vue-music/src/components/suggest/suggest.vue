@@ -86,6 +86,8 @@
         } else {  // 如果是歌曲
           this.insertSong(item) // item就是Song的实例
         }
+
+        this.$emit('select')  // 这个方法只负责跳转 存取搜索历史的操作交由它的父组件search完成
       },
       _search() {  // 请求服务端的逻辑 只在监听到query变化的时候调用一次 后面取数据是通过监听scroll事件调用searchMore
         this.page = 1 // 改变query时,要重置到第一页

@@ -30,6 +30,9 @@ const mutations = { // 与actions不同的是 它是同步修改状态 没有任
   },
   [types.SET_TOP_LIST](state, topList) {
     state.topList = topList
+  },
+  [types.SET_SEARCH_HISTORY](state, history) {  // 写入
+    state.searchHistory = history // 接收一个数组
   }
 }
 

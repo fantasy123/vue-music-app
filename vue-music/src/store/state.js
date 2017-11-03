@@ -10,7 +10,8 @@ const state = {
   mode: playMode.sequence,  // 语义化表示播放模式
   currentIndex: -1,
   disc: {},  // 推荐歌单数据对象
-  topList: {} // 排行榜数据对象
+  topList: {}, // 排行榜数据对象
+  searchHistory: [] // 多组件共用搜索历史数据
 }
 
 export default state  // 暴露出状态树

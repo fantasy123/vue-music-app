@@ -90,3 +90,8 @@ export const insertSong = function ({commit, state}, song) {  // song是待插�
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING_STATE, true)
 }
+
+// 搜索历史不仅要在组件间共享 还要永久存储到本地 实现刷新不消失 所以封装成一个action
+export const saveSearchHistory = function ({commit}, query) { // query是待存入的搜索历史数据
+
+}

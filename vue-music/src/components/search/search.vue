@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-      <suggest :query="query" @listScroll="blurInput"></suggest>
+      <suggest :query="query" @listScroll="blurInput" @select="saveSearch"></suggest>
     </div>
     <router-view></router-view>
     <!--歌手详情页作为search组件的二级路由 点击是在search组件的子组件suggest组件里做-->
@@ -56,6 +56,9 @@
       },
       blurInput() {
         this.$refs.searchBox.blur() // 调用子组件方法
+      },
+      saveSearch() {  // 响应suggest组件点击搜索建议派发的select事件(selectItem(item)) 存入搜索历史
+
       }
     },
     components: {

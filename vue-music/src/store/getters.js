@@ -22,3 +22,5 @@ export const currentSong = (state) => {
 export const disc = state => state.disc // 这里暴露出的变量可以在组件中通过this.val得到
 
 export const topList = state => state.topList
+
+export const searchHistory = state => state.searchHistory // 取出
