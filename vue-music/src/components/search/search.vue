@@ -29,6 +29,7 @@
   import {ERR_OK} from 'api/config'
   import {getHotKey} from 'api/search'
   import Suggest from 'components/suggest/suggest'  // 根据输入的query检索服务器 渲染到页面上的组件
+  import {mapActions} from 'vuex'
 
   export default {
     data() {
@@ -58,8 +59,13 @@
         this.$refs.searchBox.blur() // 调用子组件方法
       },
       saveSearch() {  // 响应suggest组件点击搜索建议派发的select事件(selectItem(item)) 存入搜索历史
-
-      }
+        this.saveSearchHistory(this.query)  // 点击热门搜索/输入检索词 => input里的值发生变化 => 双向绑定影响searchBox全局的query => 派发query事件,暴露出新query
+        // => 响应query事件,执行onQueryChange => 拿到新query,设置到本地和vuex里
+        // 流程:suggest中点击搜索建议 派发select事件 => search组件响应select事件saveSearch => 调用一个action实现本地存储和vuex数据的更新
+      },
+      ...mapActions([
+        'saveSearchHistory'
+      ])
     },
     components: {
       SearchBox,
