@@ -1,9 +1,10 @@
 <template>
   <div class="search-list" v-show="searches.length">
     <ul>
-      <li class="search-item" v-for="item in searches">
+      <li class="search-item" v-for="item in searches" @click="selectItem(item)">
         <span class="text">{{item}}</span>
-        <span class="icon">
+        <span class="icon" @click.stop="deleteOne(item)">
+          <!--要阻止冒泡,防止触发到selectItem-->
           <i class="icon-delete"></i>
         </span>
       </li>
@@ -17,6 +18,14 @@
       searches: { // 本来是直接在search组件里遍历searchHistory,现在把列表抽象成一个组件,要props down了
         type: Array,
         default: []
+      }
+    },
+    methods: {
+      selectItem(item) {  // 告诉外部组件 我被选择了 选择的是item
+        this.$emit('select', item)
+      },
+      deleteOne(item) {
+        this.$emit('delete', item)
       }
     }
   }

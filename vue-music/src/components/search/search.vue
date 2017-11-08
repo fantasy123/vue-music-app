@@ -17,11 +17,12 @@
         <div class="search-history" v-show="!query && searchHistory.length">
           <h1 class="title">
             <span class="text">搜索历史</span>
-            <span class="clear">
+            <span class="clear" @click="clearSearchHistory">
+              <!--如果代理方法只是调用了mapActions里面的方法,没有任何其他操作,并且参数也一样,就可以直接把方法应用到DOM上-->
               <i class="icon-clear"></i>
             </span>
           </h1>
-          <search-list :searches="searchHistory"></search-list>
+          <search-list @select="addQuery" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
         </div>
       </div>
     </div>
@@ -79,7 +80,9 @@
         // 流程:suggest中点击搜索建议 派发select事件 => search组件响应select事件saveSearch => 调用一个action实现本地存储和vuex数据的更新
       },
       ...mapActions([
-        'saveSearchHistory'
+        'saveSearchHistory',
+        'deleteSearchHistory',
+        'clearSearchHistory'
       ])
     },
     components: {

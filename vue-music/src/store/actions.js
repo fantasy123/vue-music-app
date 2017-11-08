@@ -1,7 +1,7 @@
 import * as types from './mutation-types'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
-import {saveSearch} from 'common/js/cache'
+import {saveSearch, deleteSearch, clearSearch} from 'common/js/cache'
 
 function findIndex (list, song) { // 从list中找到song对应的索引
   return list.findIndex((item) => {
@@ -94,4 +94,12 @@ export const insertSong = function ({commit, state}, song) {  // song是待插�
 // 搜索历史不仅要在组件间共享 还要永久存储到本地 实现刷新不消失 所以封装成一个action
 export const saveSearchHistory = function ({commit}, query) { // query是待存入的搜索历史数据
   commit(types.SET_SEARCH_HISTORY, saveSearch(query)) // saveSearch返回存储过query的新数组searches 进入mutation回调 更新state
+}
+
+export const deleteSearchHistory = function ({commit}, query) {
+  commit(types.SET_SEARCH_HISTORY, deleteSearch(query))
+}
+
+export const clearSearchHistory = function ({commit}) {
+  commit(types.SET_SEARCH_HISTORY, clearSearch())
 }
