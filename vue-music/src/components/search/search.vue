@@ -39,7 +39,7 @@
   import {getHotKey} from 'api/search'
   import {mapActions, mapGetters} from 'vuex'
   import Suggest from 'components/suggest/suggest'  // 根据输入的query检索服务器 渲染到页面上的组件
-  import SearchList from 'base/search-list/search-list' 
+  import SearchList from 'base/search-list/search-list'
 
   export default {
     data() {
