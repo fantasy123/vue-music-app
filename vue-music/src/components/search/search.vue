@@ -14,6 +14,15 @@
             </li>
           </ul>
         </div>
+        <div class="search-history" v-show="!query && searchHistory.length">
+          <h1 class="title">
+            <span class="text">搜索历史</span>
+            <span class="clear">
+              <i class="icon-clear"></i>
+            </span>
+          </h1>
+          <search-list :searches="searchHistory"></search-list>
+        </div>
       </div>
     </div>
     <div class="search-result" v-show="query">
@@ -28,8 +37,9 @@
   import SearchBox from 'base/search-box/search-box'
   import {ERR_OK} from 'api/config'
   import {getHotKey} from 'api/search'
+  import {mapActions, mapGetters} from 'vuex'
   import Suggest from 'components/suggest/suggest'  // 根据输入的query检索服务器 渲染到页面上的组件
-  import {mapActions} from 'vuex'
+  import SearchList from 'base/search-list/search-list' 
 
   export default {
     data() {
@@ -37,6 +47,11 @@
         hotKey: [],
         query: ''
       }
+    },
+    computed: {
+      ...mapGetters([
+        'searchHistory'
+      ])
     },
     created() {
       this._getHotKey()
@@ -69,7 +84,8 @@
     },
     components: {
       SearchBox,
-      Suggest
+      Suggest,
+      SearchList
     }
   }
 </script>
@@ -103,22 +119,22 @@
             background: $color-highlight-background
             font-size: $font-size-medium
             color: $color-text-d
-        //.search-history
-          //position: relative
-          //margin: 0 20px
-          //.title
-            //display: flex
-            //align-items: center
-            //height: 40px
-            //font-size: $font-size-medium
-            //color: $color-text-l
-            //.text
-              //flex: 1
-            //.clear
-              //extend-click()
-              //.icon-clear
-                //font-size: $font-size-medium
-                //color: $color-text-d
+        .search-history
+          position: relative
+          margin: 0 20px
+          .title
+            display: flex
+            align-items: center
+            height: 40px
+            font-size: $font-size-medium
+            color: $color-text-l
+            .text
+              flex: 1
+            .clear
+              extend-click()
+              .icon-clear
+                font-size: $font-size-medium
+                color: $color-text-d
     .search-result
       position: fixed
       width: 100%
