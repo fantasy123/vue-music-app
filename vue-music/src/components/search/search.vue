@@ -100,7 +100,7 @@
     },
     watch: {
       query(newQuery) {
-        if (!newQuery) {  
+        if (!newQuery) {
           setTimeout(() => {
             this.$refs.shortCut.refresh()
           }, 20)
