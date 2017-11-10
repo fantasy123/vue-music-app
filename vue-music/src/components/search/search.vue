@@ -4,28 +4,31 @@
       <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
     <div class="shortcut-wrapper" v-show="!query">
-      <div class="shortcut">
-        <div class="hot-key">
-          <h1 class="title">热门搜索</h1>
-          <ul>
-            <li class="item" v-for="item in hotKey" @click="addQuery(item.k)">
-              <!--把字段名传进去-->
-              <span>{{item.k}}</span>
-            </li>
-          </ul>
-        </div>
-        <div class="search-history" v-show="!query && searchHistory.length">
-          <h1 class="title">
-            <span class="text">搜索历史</span>
-            <span class="clear" @click="showConfirm">
+      <scroll class="shortcut" :data="shortCut" ref="shortCut">
+        <div> <!--包含2块,只会根据第一块的高度计算Scroll,所以用一个DIV把2块包起来-->
+          <!--同时因为子块中的数据(hotKey和searchHistory)分别异步获取,data传入哪个都不合适,所以用一个计算属性拼接一下这2个数据-->
+          <div class="hot-key">
+            <h1 class="title">热门搜索</h1>
+            <ul>
+              <li class="item" v-for="item in hotKey" @click="addQuery(item.k)">
+                <!--把字段名传进去-->
+                <span>{{item.k}}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="search-history" v-show="!query && searchHistory.length">
+            <h1 class="title">
+              <span class="text">搜索历史</span>
+              <span class="clear" @click="showConfirm">
               <!--不是直接clearSearchHistory,中间多了一层确认-->
               <!--如果代理方法只是调用了mapActions里面的方法,没有任何其他操作,并且参数也一样,就可以直接把方法应用到DOM上-->
               <i class="icon-clear"></i>
             </span>
-          </h1>
-          <search-list @select="addQuery" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
+            </h1>
+            <search-list @select="addQuery" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
+          </div>
         </div>
-      </div>
+      </scroll>
     </div>
     <div class="search-result" v-show="query">
       <suggest :query="query" @listScroll="blurInput" @select="saveSearch"></suggest>
@@ -44,6 +47,7 @@
   import Suggest from 'components/suggest/suggest'  // 根据输入的query检索服务器 渲染到页面上的组件
   import SearchList from 'base/search-list/search-list'
   import Confirm from 'base/confirm/confirm'
+  import Scroll from 'base/scroll/scroll'
 
   export default {
     data() {
@@ -53,6 +57,9 @@
       }
     },
     computed: {
+      shortCut() {
+        return this.hotKey.concat(this.searchHistory) // 有任一属性发生改变 shortCut都会重新计算
+      },
       ...mapGetters([
         'searchHistory'
       ])
@@ -91,11 +98,21 @@
         'clearSearchHistory'
       ])
     },
+    watch: {
+      query(newQuery) {
+        if (!newQuery) {  
+          setTimeout(() => {
+            this.$refs.shortCut.refresh()
+          }, 20)
+        }
+      }
+    },
     components: {
       SearchBox,
       Suggest,
       SearchList,
-      Confirm
+      Confirm,
+      Scroll
     }
   }
 </script>
