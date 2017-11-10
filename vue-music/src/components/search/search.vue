@@ -17,7 +17,8 @@
         <div class="search-history" v-show="!query && searchHistory.length">
           <h1 class="title">
             <span class="text">搜索历史</span>
-            <span class="clear" @click="clearSearchHistory">
+            <span class="clear" @click="showConfirm">
+              <!--不是直接clearSearchHistory,中间多了一层确认-->
               <!--如果代理方法只是调用了mapActions里面的方法,没有任何其他操作,并且参数也一样,就可以直接把方法应用到DOM上-->
               <i class="icon-clear"></i>
             </span>
@@ -29,6 +30,7 @@
     <div class="search-result" v-show="query">
       <suggest :query="query" @listScroll="blurInput" @select="saveSearch"></suggest>
     </div>
+    <confirm ref="confirm" text="是否清空所有搜索历史" confirmBtnText="清空" @confirm="clearSearchHistory"></confirm>
     <router-view></router-view>
     <!--歌手详情页作为search组件的二级路由 点击是在search组件的子组件suggest组件里做-->
   </div>
@@ -41,6 +43,7 @@
   import {mapActions, mapGetters} from 'vuex'
   import Suggest from 'components/suggest/suggest'  // 根据输入的query检索服务器 渲染到页面上的组件
   import SearchList from 'base/search-list/search-list'
+  import Confirm from 'base/confirm/confirm'
 
   export default {
     data() {
@@ -79,6 +82,9 @@
         // => 响应query事件,执行onQueryChange => 拿到新query,设置到本地和vuex里
         // 流程:suggest中点击搜索建议 派发select事件 => search组件响应select事件saveSearch => 调用一个action实现本地存储和vuex数据的更新
       },
+      showConfirm() {
+        this.$refs.confirm.show()
+      },
       ...mapActions([
         'saveSearchHistory',
         'deleteSearchHistory',
@@ -88,7 +94,8 @@
     components: {
       SearchBox,
       Suggest,
-      SearchList
+      SearchList,
+      Confirm
     }
   }
 </script>
