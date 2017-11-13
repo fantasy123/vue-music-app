@@ -105,6 +105,8 @@
         </div>
       </div>
     </transition>
+    <play-list></play-list>
+    <!--播放列表位于播放器内核页面的底部-->
     <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end"></audio>
     <!--timeupdate在audio在播放时触发 回调为updateTime 参数为一个事件对象-->
   </div>
@@ -120,6 +122,7 @@
   import { shuffle } from 'common/js/util'
   import Lyric from 'lyric-parser'  // 是一个class
   import Scroll from 'base/scroll/scroll'
+  import PlayList from 'components/playlist/playlist'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
@@ -476,7 +479,8 @@
     components: {
       ProgressBar,
       ProgressCircle,
-      Scroll
+      Scroll,
+      PlayList
     }
   }
 </script>
