@@ -3,7 +3,7 @@
     <div class="search-box-wrapper">
       <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
-    <div class="shortcut-wrapper" v-show="!query">
+    <div class="shortcut-wrapper" v-show="!query" ref="shortcutWrapper">
       <scroll class="shortcut" :data="shortCut" ref="shortCut">
         <div> <!--包含2块,只会根据第一块的高度计算Scroll,所以用一个DIV把2块包起来-->
           <!--同时因为子块中的数据(hotKey和searchHistory)分别异步获取,data传入哪个都不合适,所以用一个计算属性拼接一下这2个数据-->
@@ -30,8 +30,8 @@
         </div>
       </scroll>
     </div>
-    <div class="search-result" v-show="query">
-      <suggest :query="query" @listScroll="blurInput" @select="saveSearch"></suggest>
+    <div class="search-result" v-show="query" ref="searchResult">
+      <suggest :query="query" @listScroll="blurInput" @select="saveSearch" ref="suggest"></suggest>
     </div>
     <confirm ref="confirm" text="是否清空所有搜索历史" confirmBtnText="清空" @confirm="clearSearchHistory"></confirm>
     <router-view></router-view>
@@ -48,8 +48,10 @@
   import SearchList from 'base/search-list/search-list'
   import Confirm from 'base/confirm/confirm'
   import Scroll from 'base/scroll/scroll'
+  import {playlistMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playlistMixin],
     data() {
       return {
         hotKey: [],
@@ -68,6 +70,15 @@
       this._getHotKey()
     },
     methods: {
+      handlePlayList(playlist) {
+        const bottom = playlist.length > 0 ? '60px' : ''
+
+        this.$refs.shortcutWrapper.style.bottom = bottom  // 设置bottom
+        this.$refs.shortCut.refresh() // 刷新scroll
+
+        this.$refs.searchResult.style.bottom = bottom
+        this.$refs.suggest.refresh()  // 子组件suggest暴露出的refresh方法
+      },
       _getHotKey() {
         getHotKey().then((res) => {
           if (res.code === ERR_OK) {

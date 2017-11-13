@@ -68,6 +68,9 @@
       }
     },
     methods: {
+      refresh() {
+        this.$refs.suggest.refresh()
+      },
       selectItem(item) {  // 点击检索建议的歌手 跳到歌手详情页
         // 依然需要mapMutation写入数据 在singer-detail读出数据
         // 如果是歌手
