@@ -14,7 +14,7 @@
         </div>
         <scroll class="list-content" :data="sequenceList" ref="listContent">
           <ul>
-            <li class="item" v-for="(item, index) in sequenceList" @click="selectItem(item, index)">
+            <li class="item" ref="listItem" v-for="(item, index) in sequenceList" @click="selectItem(item, index)">
               <i class="current" :class="getCurrentIcon(item, index)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
@@ -67,6 +67,7 @@
         setTimeout(() => {
           this.$refs.listContent.refresh()  // 为防止高度计算不对 playlist显示的时候要刷新一下
           // 又因为vuex数据是异步获取的 所以要延时刷新
+          this.scrollToCurrent(this.currentSong)  // playlist刚显示的时候也要滚动 滚动到全局的currentSong这个位置
         }, 20)
       },
       hide() {
@@ -90,10 +91,28 @@
         }
 
         this.setCurrentIndex(index)
+        this.setPlayingState(true)  // 切歌成功,如果歌曲原先是暂停的 也让它播放
+      },
+      scrollToCurrent(curSong) { // 让列表滚动 使当前在播放的歌曲位于列表顶端
+        let index = this.sequenceList.findIndex((song) => {
+          return song.id === curSong.id // 找到当前歌曲在顺序列表中的索引
+        })
+
+        this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300) // 让列表滚动到索引对应的元素位置(加一个300ms的动画)
       },
       ...mapMutations({
-        setCurrentIndex: 'SET_CURRENT_INDEX'
-      })
+        setCurrentIndex: 'SET_CURRENT_INDEX',
+        setPlayingState: 'SET_PLAYING_STATE'
+      }),
+      watch: {  // 切歌成功的时候滚动
+        currentSong(newSong, oldSong) {
+          if (!this.showFlag || newSong.id === oldSong.id) {  // playlist没有展开或者歌曲没有变化
+            return
+          }
+
+          this.scrollToCurrent(newSong) // 滚动到我们选择的歌曲位置
+        }
+      }
     },
     components: {
       Scroll

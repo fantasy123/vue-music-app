@@ -100,7 +100,8 @@
             <!--slot插槽内容-->
           </progress-circle>
         </div>
-        <div class="control" @click="showPlaylist">
+        <div class="control" @click.stop="showPlaylist">
+          <!--阻止冒泡,防止被父容器mini-player捕获,展开播放器-->
           <i class="icon-playlist"></i>
         </div>
       </div>
