@@ -21,7 +21,7 @@
                 <i class="icon-not-favorite"></i>
                 <!--not-favorite继承父元素的黄色,favorite另外一种颜色(红色)-->
               </span>
-              <span class="delete">
+              <span class="delete" @click="deleteOne(item)">
                 <i class="icon-delete"></i>
               </span>
             </li>
@@ -61,6 +61,9 @@
       ])
     },
     methods: {
+      deleteOne(item) {
+
+      },
       show() {  // 交由外层控制
         this.showFlag = true
 
@@ -94,7 +97,7 @@
         this.setPlayingState(true)  // 切歌成功,如果歌曲原先是暂停的 也让它播放
       },
       scrollToCurrent(curSong) { // 让列表滚动 使当前在播放的歌曲位于列表顶端
-        let index = this.sequenceList.findIndex((song) => {
+        const index = this.sequenceList.findIndex((song) => {
           return song.id === curSong.id // 找到当前歌曲在顺序列表中的索引
         })
 
@@ -102,7 +105,8 @@
       },
       ...mapMutations({
         setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayingState: 'SET_PLAYING_STATE'
+        setPlayingState: 'SET_PLAYING_STATE',
+        setPlayList: 'SET_PLAYLIST'
       }),
       watch: {  // 切歌成功的时候滚动
         currentSong(newSong, oldSong) {
@@ -110,7 +114,9 @@
             return
           }
 
-          this.scrollToCurrent(newSong) // 滚动到我们选择的歌曲位置
+          setTimeout(() => {
+            this.scrollToCurrent(newSong) // 滚动到我们选择的歌曲位置
+          }, 20)
         }
       }
     },

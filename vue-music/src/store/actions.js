@@ -91,6 +91,34 @@ export const insertSong = function ({commit, state}, song) {  // song是待插�
   commit(types.SET_PLAYING_STATE, true)
 }
 
+// 删除歌曲同样涉及很多操作 封装成action
+export const deleteSong = function ({commit, state}, song) { // 传入待删除的歌曲
+  // 先通过state拿到要修改的3个值
+  let playList = state.playList.slice()
+  let sequenceList = state.sequenceList.slice()
+  let currentIndex = state.currentIndex
+
+  // 处理值
+  let pIndex = findIndex(playList, song)  // findIndex是封装好的取索引方法
+  playList.splice(pIndex, 1)  // 从playList里删掉歌曲
+
+  let sIndex = findIndex(sequenceList, song)
+  sequenceList.splice(sIndex, 1)
+
+  if (currentIndex > pIndex || currentIndex === playList.length) {  // 删除的是当前播放之前的歌曲或者当前正在播放最后一首歌曲
+    currentIndex--
+  }// 在后面删 currentIndex不变
+
+  // 值处理完成 提交mutation
+  commit(types.SET_PLAYLIST, playList)
+  commit(types.SET_SEQUENCE_LIST, sequenceList)
+  commit(types.SET_CURRENT_INDEX, currentIndex)
+
+  if (!playList.length) { // 删完了
+    commit(types.SET_PLAYING_STATE, false)  // 停止播放
+  }
+}
+
 // 搜索历史不仅要在组件间共享 还要永久存储到本地 实现刷新不消失 所以封装成一个action
 export const saveSearchHistory = function ({commit}, query) { // query是待存入的搜索历史数据
   commit(types.SET_SEARCH_HISTORY, saveSearch(query)) // saveSearch返回存储过query的新数组searches 进入mutation回调 更新state
