@@ -1,7 +1,8 @@
 <template>
   <transition name="list-fade">
-    <div class="playlist">
-      <div class="list-wrapper">
+    <div class="playlist" v-show="showFlag" @click="hide">
+      <div class="list-wrapper" @click.stop>
+        <!--拦截内部元素点击冒泡,被蒙层捕获-->
         <div class="list-header">
           <h1 class="title">
             <i class="icon"></i>
@@ -31,7 +32,7 @@
             <span class="text">添加歌曲到队列</span>
           </div>
         </div>
-        <div class="list-close">
+        <div class="list-close" @click="hide">
           <span>关闭</span>
         </div>
       </div>
@@ -41,7 +42,19 @@
 
 <script type="text/ecmascript-6">
   export default {
-
+    data() {
+      return {
+        showFlag: false
+      }
+    },
+    methods: {
+      show() {  // 交由外层控制
+        this.showFlag = true
+      },
+      hide() {
+        this.showFlag = false
+      }
+    }
   }
 </script>
 

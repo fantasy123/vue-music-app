@@ -100,12 +100,12 @@
             <!--slot插槽内容-->
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <play-list></play-list>
+    <play-list ref="playlist"></play-list>
     <!--播放列表位于播放器内核页面的底部-->
     <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end"></audio>
     <!--timeupdate在audio在播放时触发 回调为updateTime 参数为一个事件对象-->
@@ -168,6 +168,9 @@
       ])
     },
     methods: {
+      showPlaylist() {
+        this.$refs.playlist.show()  // show由playlist暴露而出 控制自身的showFlag 实现外部控制显示/隐藏的目的
+      },
       enter (el, done) { // el:作用元素 done的回调就是afterEnter
         const {x, y, scale} = this._getPosAndScale()
 
