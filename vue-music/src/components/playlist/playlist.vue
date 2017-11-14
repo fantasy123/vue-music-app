@@ -7,14 +7,16 @@
           <h1 class="title">
             <i class="icon icon-random"></i>
             <span class="text">我是文本</span>
-            <span class="clear">
+            <span class="clear" @click="showConfirm">
               <i class="icon-clear"></i>
             </span>
           </h1>
         </div>
         <scroll class="list-content" :data="sequenceList" ref="listContent">
-          <ul>
-            <li class="item" ref="listItem" v-for="(item, index) in sequenceList" @click="selectItem(item, index)">
+          <transition-group ref="list" name="list" tag="ul">
+            <!--让transition-group渲染成一个ul-->
+            <!--子元素要用一个key来互相区分-->
+            <li :key="item.id" class="item" ref="listItem" v-for="(item, index) in sequenceList" @click="selectItem(item, index)">
               <i class="current" :class="getCurrentIcon(item, index)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
@@ -26,7 +28,7 @@
                 <i class="icon-delete"></i>
               </span>
             </li>
-          </ul>
+          </transition-group>
         </scroll>
         <div class="list-operate">
           <div class="add">
@@ -38,6 +40,7 @@
           <span>关闭</span>
         </div>
       </div>
+      <confirm ref="confirm" text="是否清空播放列表" confirmBtnText="清空" @confirm="confirmClear"></confirm>
     </div>
   </transition>
 </template>
@@ -46,6 +49,7 @@
   import {mapGetters, mapMutations, mapActions} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import {playMode} from 'common/js/config'
+  import Confirm from 'base/confirm/confirm'
 
   export default {
     data() {
@@ -62,6 +66,13 @@
       ])
     },
     methods: {
+      confirmClear() {
+        this.deleteSongList()
+        this.hide() // 隐藏播放列表
+      },
+      showConfirm() {
+        this.$refs.confirm.show()
+      },
       deleteOne(item) {
         this.deleteSong(item)
 
@@ -114,7 +125,8 @@
         setPlayList: 'SET_PLAYLIST'
       }),
       ...mapActions([
-        'deleteSong'
+        'deleteSong',
+        'deleteSongList'
       ])
     },
     watch: {  // 切歌成功的时候滚动
@@ -129,7 +141,8 @@
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Confirm
     }
   }
 </script>
@@ -188,10 +201,10 @@
           height: 40px
           padding: 0 30px 0 20px
           overflow: hidden
-          &.list-enter-active, &.list-leave-active
+          &.list-enter-active, &.list-leave-active  // list是动画名称
             transition: all 0.1s
           &.list-enter, &.list-leave-to
-            height: 0
+            height: 0 // 高度从40到0
           .current
             flex: 0 0 20px
             width: 20px

@@ -1,6 +1,8 @@
 <template>
   <transition name="confirm-fade">
-    <div class="confirm" v-show="showFlag">
+    <div class="confirm" v-show="showFlag" @click.stop>
+      <!--因为confirm是playlist的子组件,所以点击confirm组件上的取消按钮的时候,
+      点击事件会冒泡到playlist上,触发遮罩层的点击事件 隐藏playlist 所以加一层拦截-->
       <div class="confirm-wrapper">
         <div class="confirm-content">
           <p class="text">{{text}}</p>

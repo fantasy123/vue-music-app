@@ -114,12 +114,15 @@ export const deleteSong = function ({commit, state}, song) { // 传入待删除�
   commit(types.SET_SEQUENCE_LIST, sequenceList)
   commit(types.SET_CURRENT_INDEX, currentIndex)
 
-  if (!playList.length) { // 删完了
-    commit(types.SET_PLAYING_STATE, false)  // 停止播放
-  } else {  // 当我们还有播放列表的时候
-    // 切到下一首歌默认播放
-    commit(types.SET_PLAYING_STATE, true)
-  }
+  const playingState = playList.length > 0
+  commit(types.SET_PLAYING_STATE, playingState)
+}
+
+export const deleteSongList = function ({commit}) {
+  commit(types.SET_PLAYLIST, [])
+  commit(types.SET_SEQUENCE_LIST, [])
+  commit(types.SET_CURRENT_INDEX, -1)
+  commit(types.SET_PLAYING_STATE, false)
 }
 
 // 搜索历史不仅要在组件间共享 还要永久存储到本地 实现刷新不消失 所以封装成一个action
