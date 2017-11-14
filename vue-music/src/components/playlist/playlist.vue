@@ -21,7 +21,8 @@
                 <i class="icon-not-favorite"></i>
                 <!--not-favorite继承父元素的黄色,favorite另外一种颜色(红色)-->
               </span>
-              <span class="delete" @click="deleteOne(item)">
+              <span class="delete" @click.stop="deleteOne(item)">
+                <!--阻止冒泡,触发selectItem-->
                 <i class="icon-delete"></i>
               </span>
             </li>
@@ -42,7 +43,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters, mapMutations} from 'vuex'
+  import {mapGetters, mapMutations, mapActions} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import {playMode} from 'common/js/config'
 
@@ -62,7 +63,11 @@
     },
     methods: {
       deleteOne(item) {
+        this.deleteSong(item)
 
+        if (!this.playList.length) {
+          this.hide() // 播放列表没有歌曲的时候 playlist组件隐藏
+        }
       },
       show() {  // 交由外层控制
         this.showFlag = true
@@ -108,16 +113,19 @@
         setPlayingState: 'SET_PLAYING_STATE',
         setPlayList: 'SET_PLAYLIST'
       }),
-      watch: {  // 切歌成功的时候滚动
-        currentSong(newSong, oldSong) {
-          if (!this.showFlag || newSong.id === oldSong.id) {  // playlist没有展开或者歌曲没有变化
-            return
-          }
-
-          setTimeout(() => {
-            this.scrollToCurrent(newSong) // 滚动到我们选择的歌曲位置
-          }, 20)
+      ...mapActions([
+        'deleteSong'
+      ])
+    },
+    watch: {  // 切歌成功的时候滚动
+      currentSong(newSong, oldSong) {
+        if (!this.showFlag || newSong.id === oldSong.id) {  // playlist没有展开或者歌曲没有变化
+          return
         }
+
+        setTimeout(() => {
+          this.scrollToCurrent(newSong) // 滚动到我们选择的歌曲位置
+        }, 20)
       }
     },
     components: {

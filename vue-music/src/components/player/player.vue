@@ -1,5 +1,6 @@
 <template>
   <div class="player" v-show="playList.length>0">
+    <!--歌曲删光的时候,父级的player隐藏,play-list自然也无法显示-->
     <transition name="normal"
                 @enter="enter"
                 @after-enter="afterEnter"
@@ -456,6 +457,10 @@
     },
     watch: {
       currentSong (newSong, oldSong) { // 打开第一首歌/换歌的时候 播放音频
+        if (!newSong.id) {  // 假如列表只有一首歌 删除它 更改了currentSong 为null 就不应该执行下面的歌词逻辑
+          return
+        }
+
         if (newSong.id === oldSong.id) {  // 虽然代码层面上watch触发了 但我们可以认为加限制条件
           return // id没变 什么都不做
         }

@@ -116,6 +116,9 @@ export const deleteSong = function ({commit, state}, song) { // 传入待删除�
 
   if (!playList.length) { // 删完了
     commit(types.SET_PLAYING_STATE, false)  // 停止播放
+  } else {  // 当我们还有播放列表的时候
+    // 切到下一首歌默认播放
+    commit(types.SET_PLAYING_STATE, true)
   }
 }
 
