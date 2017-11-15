@@ -24,3 +24,5 @@ export const disc = state => state.disc // 这里暴露出的变量可以在组�
 export const topList = state => state.topList
 
 export const searchHistory = state => state.searchHistory // 取出
+
+export const playHistory = state => state.playHistory

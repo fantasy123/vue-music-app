@@ -14,6 +14,13 @@
       <div class="shortcut" v-show="!query">
         <!--包含最近播放列表和搜索历史-->
         <switches :currentIndex="currentIndex" :switches="switches" @switch="switchItem"></switches>
+        <div class="list-wrapper">
+          <scroll v-if="currentIndex === 0" :data="playHistory">
+            <div class="list-inner">
+              <song-list :songs="playHistory"></song-list>
+            </div>
+          </scroll>
+        </div>
       </div>
       <!--2块根据搜索框有无搜索内容来切换-->
       <div class="search-result" v-show="query">
@@ -29,6 +36,9 @@
   import Suggest from 'components/suggest/suggest'
   import {searchMixin} from 'common/js/mixin'
   import Switches from 'base/switches/switches'
+  import Scroll from 'base/scroll/scroll'
+  import { mapGetters } from 'vuex'
+  import SongList from 'base/song-list/song-list'
 
   export default {
     mixins: [searchMixin],
@@ -47,6 +57,11 @@
         ]
       }
     },
+    computed: {
+      ...mapGetters([
+        'playHistory'
+      ])
+    },
     methods: {
       show() {
         this.showFlag = true
@@ -64,7 +79,9 @@
     components: {
       SearchBox,
       Suggest,
-      Switches
+      Switches,
+      Scroll,
+      SongList
     }
   }
 </script>

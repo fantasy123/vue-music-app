@@ -109,13 +109,13 @@
     </transition>
     <play-list ref="playlist"></play-list>
     <!--播放列表位于播放器内核页面的底部-->
-    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end"></audio>
+    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end" @canplay="ready"></audio>
     <!--timeupdate在audio在播放时触发 回调为updateTime 参数为一个事件对象-->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import { mapGetters, mapMutations } from 'vuex' // V 数据映射到组件DOM上
+  import { mapGetters, mapMutations, mapActions } from 'vuex' // V 数据映射到组件DOM上
   import animations from 'create-keyframe-animation'  // JS创建CSS 3动画第三方库
   import { prefixStyle } from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
@@ -164,6 +164,9 @@
       ])
     },
     methods: {
+      ready() {
+        this.savePlayHistory(this.currentSong)  // 把当前歌曲存入播放历史
+      },
       showPlaylist() {
         this.$refs.playlist.show()  // show由playlist暴露而出 控制自身的showFlag 实现外部控制显示/隐藏的目的
       },
@@ -416,7 +419,10 @@
       },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
         setFullScreen: 'SET_FULL_SCREEN'  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
-      })
+      }),
+      ...mapActions([
+        'savePlayHistory'
+      ])
     },
     watch: {
       currentSong (newSong, oldSong) { // 打开第一首歌/换歌的时候 播放音频

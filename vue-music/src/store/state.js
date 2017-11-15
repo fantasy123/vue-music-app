@@ -1,5 +1,5 @@
 import {playMode} from 'common/js/config'
-import {loadSearch} from 'common/js/cache'
+import {loadSearch, loadPlay} from 'common/js/cache'
 
 // 状态树
 const state = {
@@ -12,7 +12,8 @@ const state = {
   currentIndex: -1,
   disc: {},  // 推荐歌单数据对象
   topList: {}, // 排行榜数据对象
-  searchHistory: loadSearch() // 多组件共用搜索历史数据,应该从本地缓存去读 而不是始终置为空(刷新页面state会重置,本地缓存是可以持久化的)
+  searchHistory: loadSearch(), // 多组件共用搜索历史数据,应该从本地缓存去读 而不是始终置为空(刷新页面state会重置,本地缓存是可以持久化的)
+  playHistory: loadPlay()
 }
 
 export default state  // 暴露出状态树
