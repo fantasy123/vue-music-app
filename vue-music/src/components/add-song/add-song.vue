@@ -13,6 +13,7 @@
       </div>
       <div class="shortcut" v-show="!query">
         <!--包含最近播放列表和搜索历史-->
+        <switches :currentIndex="currentIndex" :switches="switches" @switch="switchItem"></switches>
       </div>
       <!--2块根据搜索框有无搜索内容来切换-->
       <div class="search-result" v-show="query">
@@ -27,13 +28,23 @@
   import SearchBox from 'base/search-box/search-box'
   import Suggest from 'components/suggest/suggest'
   import {searchMixin} from 'common/js/mixin'
+  import Switches from 'base/switches/switches'
 
   export default {
     mixins: [searchMixin],
     data() {
       return {
         showFlag: false,
-        showSinger: false
+        showSinger: false,
+        currentIndex: 0,
+        switches: [
+          {
+            name: '最近播放'
+          },
+          {
+            name: '搜索历史'
+          }
+        ]
       }
     },
     methods: {
@@ -45,11 +56,15 @@
       },
       selectSuggest() { // 除了saveSearch,还有其他操作,所以要加一层代理
         this.saveSearch() // 会调用saveSearchHistory这个action
+      },
+      switchItem(index) {
+        this.currentIndex = index
       }
     },
     components: {
       SearchBox,
-      Suggest
+      Suggest,
+      Switches
     }
   }
 </script>
