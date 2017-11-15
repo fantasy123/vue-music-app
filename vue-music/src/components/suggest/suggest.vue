@@ -1,4 +1,5 @@
 <template>
+  <!--记-->
   <scroll class="suggest"
           :data="result"
           :pullup="pullup"
@@ -162,7 +163,7 @@
           return `${item.name}-${item.singer}`  // 后面不再需要调用filterSinger 因为singer的格式化在createSong的时候就已经被处理了
         }
       },
-      listScroll() {
+      listScroll() {  // 记
         this.$emit('listScroll')  // 告诉search组件 列表滚动了 要着手失焦了(滚动组件归suggest所有 所以要经过它的传递)
         // 不可能直接跟search-box对话 他们共有父组件search
       },

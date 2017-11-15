@@ -32,7 +32,7 @@
         type: Boolean,
         default: false
       },
-      beforeScroll: { // 决定是否要监听beforeScrollStart事件的变量
+      beforeScroll: { // 决定是否要监听beforeScrollStart事件的变量 记
         type: Boolean,
         default: false
       }
@@ -70,7 +70,7 @@
           })
         }
 
-        if (this.beforeScroll) {  // 这个scroll组件的父元素把beforeScroll值置为true再props down
+        if (this.beforeScroll) {  // 这个scroll组件的父元素把beforeScroll值置为true再props down 记
           this.scroll.on('beforeScrollStart', () => { // 监听beforeScrollStart事件(better-scroll接口,在滚动开始的时候触发)
             this.$emit('beforeScroll')  // 向外派发一个beforeScroll事件 表示列表被滚动了
           })

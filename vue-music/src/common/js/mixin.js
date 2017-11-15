@@ -1,4 +1,4 @@
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
 
@@ -73,6 +73,43 @@ export const playerMixin = {
       })
 
       this.setCurrentIndex(index) // 把重置后的索引设置到vuex里,确保还是同一首歌
+    }
+  }
+}
+
+export const searchMixin = {  // add-song和search组件公用逻辑:监听listScroll调用blurInput/saveSearch
+  data() {
+    return {
+      query: ''
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'searchHistory' // 2边都要渲染搜索历史
+    ])
+  },
+  methods: {
+    ...mapActions([
+      'deleteSearchHistory',  // add-song和search组件都有删除搜索历史的选项
+      'saveSearchHistory'
+    ]),
+    onQueryChange(query) {
+      // 这个query还能决定shortCut和searchResult两个区块的显示和隐藏
+      this.query = query
+    },
+    addQuery(query) { // 点击热门搜索设置input值
+      this.$refs.searchBox.setQuery(query) // 要调用子组件search-box暴露出的setQuery方法才能影响它的内容
+    },
+    blurInput() {
+      this.$refs.searchBox.blur()
+    },
+    saveSearch() {
+      this.saveSearchHistory(this.query)  // 点击热门搜索/输入检索词 => input里的值发生变化 => 双向绑定改变searchBox全局的query =>
+      // (watch this.query)派发query事件,暴露出新query => search/add-song组件响应query事件,执行onQueryChange把拿到的新query赋值给this.query
+      // this.query下放到suggest来检索(search/add-song组件都是search-box组件和suggest组件的父组件,作用是query桥梁)
+
+      //  另一方面: suggest中点击搜索建议(selectItem(item)) 执行歌曲的播放和歌手页的跳转(item作为跳转依据) 同时派发select事件
+      //  search/add-song组件响应select事件调用saveSearch(this.query),调用一个action实现本地存储和vuex数据的更新
     }
   }
 }

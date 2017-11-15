@@ -9,24 +9,31 @@
         </div>
       </div>
       <div class="search-box-wrapper">
-
+        <search-box placeholder="搜索歌曲" @query="onQueryChange"></search-box>
       </div>
-      <div class="shortcut">
+      <div class="shortcut" v-show="!query">
         <!--包含最近播放列表和搜索历史-->
       </div>
       <!--2块根据搜索框有无搜索内容来切换-->
-      <div class="search-result">
-        <!--包含一个suggest组件-->
+      <div class="search-result" v-show="query">
+        <!--有搜索内容显示搜索建议(suggest组件)-->
+        <suggest :query="query" :showSinger="showSinger" @select="saveSearch" @listScroll="blurInput"></suggest>
       </div>
     </div>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
+  import SearchBox from 'base/search-box/search-box'
+  import Suggest from 'components/suggest/suggest'
+  import {searchMixin} from 'common/js/mixin'
+
   export default {
+    mixins: [searchMixin],
     data() {
       return {
-        showFlag: false
+        showFlag: false,
+        showSinger: false
       }
     },
     methods: {
@@ -36,6 +43,10 @@
       hide() {
         this.showFlag = false
       }
+    },
+    components: {
+      SearchBox,
+      Suggest
     }
   }
 </script>
@@ -74,7 +85,7 @@
           color: $color-theme
 
     .search-box-wrapper
-      //margin: 20px
+      margin: 20px
     .shortcut
       .list-wrapper
         //position: absolute
@@ -87,10 +98,10 @@
           .list-inner
             //padding: 20px 30px
     .search-result
-      //position: fixed
-      //top: 124px
-      //bottom: 0
-      //width: 100%
+      position: fixed
+      top: 124px
+      bottom: 0
+      width: 100%
     .tip-title
       //text-align: center
       //padding: 18px 0
