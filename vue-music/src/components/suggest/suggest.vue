@@ -164,8 +164,8 @@
         }
       },
       listScroll() {  // 记
-        this.$emit('listScroll')  // 告诉search组件 列表滚动了 要着手失焦了(滚动组件归suggest所有 所以要经过它的传递)
-        // 不可能直接跟search-box对话 他们共有父组件search
+        this.$emit('listScroll')  // 告诉search组件和add-song组件 列表滚动了 要着手失焦了(滚动组件归suggest所有 所以要经过它的传递)
+        // 不可能直接跟search-box对话 他们共有父组件search/add-song
       },
       ...mapMutations({
         setSinger: 'SET_SINGER'

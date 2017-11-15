@@ -17,7 +17,7 @@
       <!--2块根据搜索框有无搜索内容来切换-->
       <div class="search-result" v-show="query">
         <!--有搜索内容显示搜索建议(suggest组件)-->
-        <suggest :query="query" :showSinger="showSinger" @select="saveSearch" @listScroll="blurInput"></suggest>
+        <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
       </div>
     </div>
   </transition>
@@ -42,6 +42,9 @@
       },
       hide() {
         this.showFlag = false
+      },
+      selectSuggest() { // 除了saveSearch,还有其他操作,所以要加一层代理
+        this.saveSearch() // 会调用saveSearchHistory这个action
       }
     },
     components: {
