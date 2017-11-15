@@ -1,4 +1,4 @@
-// 辅助函数 获取min到max之间的随机整数
+// 辅助函数 获取min到max之间的随机整数 不暴露出去
 function getRandomInt (min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min)  // 因为Math.random左闭右开 为了包括max 所以max - min + 1
 }

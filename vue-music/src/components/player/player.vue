@@ -120,16 +120,17 @@
   import { prefixStyle } from 'common/js/dom'
   import ProgressBar from 'base/progress-bar/progress-bar'
   import ProgressCircle from 'base/progress-circle/progress-circle'
-  import { playMode } from 'common/js/config'
-  import { shuffle } from 'common/js/util'
   import Lyric from 'lyric-parser'  // 是一个class
   import Scroll from 'base/scroll/scroll'
   import PlayList from 'components/playlist/playlist'
+  import {playerMixin} from 'common/js/mixin'
+  import { playMode } from 'common/js/config'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
 
   export default {
+    mixins: [playerMixin],
     data () {
       return {
         currentTime: 0,
@@ -155,9 +156,6 @@
       },
       percent () {
         return this.currentTime / this.currentSong.duration // 根据当前播放时间和总时长计算出百分比
-      },
-      iconMode () {
-        return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
       },
       ...mapGetters([ // mapGetters在计算属性里 定义全局变量
         'fullScreen', // 组件级使用的变量
@@ -327,33 +325,6 @@
           this.currentLyric.seek(currentTime * 1000)
         }
       },
-      changeMode () {
-        // 三种播放模式是用数字表示
-        const mode = (this.mode + 1) % 3  // 一共3种模式 对3取余
-
-        // 接下来通过mutation设置到vuex里
-        this.setPlayMode(mode)
-
-        // 真正设置播放列表
-        let list = null
-
-        if (mode === playMode.random) {
-          list = shuffle(this.sequenceList) // 打乱当前顺序列表
-        } else {
-          list = this.sequenceList  // 顺序播放或循环播放 活跃列表就是顺序列表
-        }
-
-        this.resetCurrentIndex(list)  // 同时改变currentIndex 使得最终currentSong的id不变
-        // 去vuex里修改
-        this.setPlayList(list)  // 修改了playList 如果currentIndex没变  那么currentSong会改变 但我们希望它不改变
-      },
-      resetCurrentIndex (list) {
-        let index = list.findIndex((item) => {  // ES 6语法
-          return item.id === this.currentSong.id  // 在打乱后的随机列表里找到当前播放的歌曲(id唯一标记一首歌) 返回它的索引
-        })
-
-        this.setCurrentIndex(index) // 把重置后的索引设置到vuex里
-      },
       _getlyric() {
         this.currentSong.getlyric().then((lyric) => { // 还可以接收一个回调函数 进行更细致的操作
           this.currentLyric = new Lyric(lyric, this.handleLyric)  // 传入Song类的getlyric方法得到的歌词 构造一个规范化各行歌词信息的歌词实例
@@ -448,11 +419,7 @@
         this.$refs.middleL.style[transitionDuration] = `${time}ms`  // middleL透明度和歌词本位移缓动时间相同
       },
       ...mapMutations({ // mapMutations和mapActions都在methods里面 定义全局方法 mapMutations是键值对 mapActions是字符串数组
-        setFullScreen: 'SET_FULL_SCREEN',  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
-        setPlayingState: 'SET_PLAYING_STATE',  // 建立映射
-        setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayMode: 'SET_PLAY_MODE',  // 通过getters得到mode 通过mutation改变mode
-        setPlayList: 'SET_PLAYLIST'
+        setFullScreen: 'SET_FULL_SCREEN'  // 建立全局方法和mutations.js里面的字符串常量(就是方法名)的映射关系
       })
     },
     watch: {

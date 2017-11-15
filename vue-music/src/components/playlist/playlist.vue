@@ -5,7 +5,7 @@
         <!--拦截内部元素点击冒泡,被蒙层捕获-->
         <div class="list-header">
           <h1 class="title">
-            <i class="icon icon-random"></i>
+            <i class="icon" :class="iconMode"></i>
             <span class="text">我是文本</span>
             <span class="clear" @click="showConfirm">
               <i class="icon-clear"></i>
@@ -46,12 +46,14 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters, mapMutations, mapActions} from 'vuex'
+  import {mapGetters, mapActions} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import {playMode} from 'common/js/config'
   import Confirm from 'base/confirm/confirm'
+  import {playerMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playerMixin],
     data() {
       return {
         showFlag: false
@@ -119,11 +121,6 @@
 
         this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300) // 让列表滚动到索引对应的元素位置(加一个300ms的动画)
       },
-      ...mapMutations({
-        setCurrentIndex: 'SET_CURRENT_INDEX',
-        setPlayingState: 'SET_PLAYING_STATE',
-        setPlayList: 'SET_PLAYLIST'
-      }),
       ...mapActions([
         'deleteSong',
         'deleteSongList'
