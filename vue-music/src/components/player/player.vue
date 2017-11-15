@@ -159,12 +159,8 @@
       },
       ...mapGetters([ // mapGetters在计算属性里 定义全局变量
         'fullScreen', // 组件级使用的变量
-        'playList',
-        'currentSong', // getters里通过计算属性计算得到
         'playing', // 从vuex里拿播放状态 作为组件级全局变量
-        'currentIndex',
-        'mode',  // 可以通过this.mode访问到当前播放模式
-        'sequenceList'  // 原始顺序列表
+        'currentIndex'
       ])
     },
     methods: {

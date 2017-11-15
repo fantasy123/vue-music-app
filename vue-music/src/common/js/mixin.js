@@ -31,6 +31,12 @@ export const playlistMixin = {
 
 export const playerMixin = {
   computed: {
+    ...mapGetters([
+      'sequenceList',
+      'currentSong',
+      'mode',
+      'playList'
+    ]),
     iconMode () { // 实现playlist组件和player组件icon样式共享
       return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
     }

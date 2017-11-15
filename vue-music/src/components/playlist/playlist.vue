@@ -5,8 +5,8 @@
         <!--拦截内部元素点击冒泡,被蒙层捕获-->
         <div class="list-header">
           <h1 class="title">
-            <i class="icon" :class="iconMode"></i>
-            <span class="text">我是文本</span>
+            <i class="icon" :class="iconMode" @click="changeMode"></i>
+            <span class="text">{{modeText}}</span>
             <span class="clear" @click="showConfirm">
               <i class="icon-clear"></i>
             </span>
@@ -46,7 +46,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters, mapActions} from 'vuex'
+  import {mapActions} from 'vuex'
   import Scroll from 'base/scroll/scroll'
   import {playMode} from 'common/js/config'
   import Confirm from 'base/confirm/confirm'
@@ -60,12 +60,9 @@
       }
     },
     computed: {
-      ...mapGetters([ // 只需通过vuex取数据,不需要线上抓取了
-        'sequenceList', // 用sequenceList来填充playlist
-        'currentSong',
-        'mode',
-        'playList'
-      ])
+      modeText() {
+        return this.mode === playMode.random ? '随机播放' : this.mode === playMode.sequence ? '顺序播放' : '单曲循环'
+      }
     },
     methods: {
       confirmClear() {
