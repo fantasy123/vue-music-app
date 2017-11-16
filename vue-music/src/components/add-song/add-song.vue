@@ -9,15 +9,24 @@
         </div>
       </div>
       <div class="search-box-wrapper">
-        <search-box placeholder="搜索歌曲" @query="onQueryChange"></search-box>
+        <search-box placeholder="搜索歌曲" @query="onQueryChange" ref="searchBox"></search-box>
       </div>
       <div class="shortcut" v-show="!query">
         <!--包含最近播放列表和搜索历史-->
         <switches :currentIndex="currentIndex" :switches="switches" @switch="switchItem"></switches>
         <div class="list-wrapper">
-          <scroll v-if="currentIndex === 0" :data="playHistory" class="list-scroll">
+          <scroll v-if="currentIndex === 0" :data="playHistory" class="list-scroll" ref="songList">
             <div class="list-inner">
               <song-list :songs="playHistory" @select="selectSong"></song-list>
+            </div>
+          </scroll>
+          <scroll v-if="currentIndex === 1" class="list-scroll" :data="searchHistory" ref="searchList">
+            <!--search组件和add-song组件都要渲染搜索历史,所以searchMixin里通过getter拿到searchHistory-->
+            <div class="list-inner">
+              <search-list :searches="searchHistory" @delete="deleteSearchHistory" @select="addQuery"></search-list>
+<!--search-list组件里点垃圾桶 => deleteOne(item) => 派发delete事件,传递item => 父组件响应delete,调用action删除搜索历史 (该action已在searchMixin里共享)-->
+<!--search-list组件里选择一项 => selectItem(item) => 派发select事件,传递item(搜索文本) => 父组件响应select,调用addQuery(已共享)方法 => addQuery调用子组件searchBox-->
+<!--的setQuery(queryTxt)方法设置全局query为点击的搜索文本(层层传递) => 双向绑定填充search-box-->
             </div>
           </scroll>
         </div>
@@ -28,6 +37,8 @@
         <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
       </div>
     </div>
+    <!--short-cut和search-result由query控制交替显示-->
+    <!--short-cut>tab+(list-wrapper>scroll+scroll) 2个scroll由tab控制显示-->
   </transition>
 </template>
 
@@ -40,6 +51,7 @@
   import { mapGetters, mapActions } from 'vuex'
   import SongList from 'base/song-list/song-list'
   import Song from 'common/js/song'
+  import SearchList from 'base/search-list/search-list'
 
   export default {
     mixins: [searchMixin],
@@ -75,6 +87,15 @@
       },
       show() {
         this.showFlag = true
+
+        // 默认add-song组件是display:none 而scroll组件已经初始化 高度肯定计算不对 所以add-song组件出现的时候要延时刷新一下scroll 重新计算高度
+        setTimeout(() => {
+          if (this.currentIndex === 0) {
+            this.$refs.songList.refresh()
+          } else {
+            this.$refs.searchList.refresh()
+          }
+        }, 20)
       },
       hide() {
         this.showFlag = false
@@ -91,7 +112,8 @@
       Suggest,
       Switches,
       Scroll,
-      SongList
+      SongList,
+      SearchList
     }
   }
 </script>
