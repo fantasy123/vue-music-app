@@ -15,9 +15,9 @@
         <!--包含最近播放列表和搜索历史-->
         <switches :currentIndex="currentIndex" :switches="switches" @switch="switchItem"></switches>
         <div class="list-wrapper">
-          <scroll v-if="currentIndex === 0" :data="playHistory">
+          <scroll v-if="currentIndex === 0" :data="playHistory" class="list-scroll">
             <div class="list-inner">
-              <song-list :songs="playHistory"></song-list>
+              <song-list :songs="playHistory" @select="selectSong"></song-list>
             </div>
           </scroll>
         </div>
@@ -37,8 +37,9 @@
   import {searchMixin} from 'common/js/mixin'
   import Switches from 'base/switches/switches'
   import Scroll from 'base/scroll/scroll'
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapActions } from 'vuex'
   import SongList from 'base/song-list/song-list'
+  import Song from 'common/js/song'
 
   export default {
     mixins: [searchMixin],
@@ -63,6 +64,15 @@
       ])
     },
     methods: {
+      ...mapActions([
+        'insertSong'
+      ]),
+      selectSong(song, index) {  // song-list点击项目,selectItem(item, index) => 派发select事件告诉外部歌曲item被选择了 => add-song监听select事件,调用selectSong
+        // => 把被点击的歌曲插入到playlist
+        if (index !== 0) {  // index === 0 <=> 第一首歌,就是当前播放的歌曲 不需要插入
+          this.insertSong(new Song(song)) // 格式化插入的song
+        }
+      },
       show() {
         this.showFlag = true
       },
@@ -123,15 +133,16 @@
       margin: 20px
     .shortcut
       .list-wrapper
-        //position: absolute
-        //top: 165px
-        //bottom: 0
-        //width: 100%
+        position: absolute
+        top: 165px
+        bottom: 0
+        width: 100%
+        background: none
         .list-scroll
-          //height: 100%
-          //overflow: hidden
+          height: 100%
+          overflow: hidden
           .list-inner
-            //padding: 20px 30px
+            padding: 20px 30px
     .search-result
       position: fixed
       top: 124px

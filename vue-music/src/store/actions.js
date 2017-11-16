@@ -42,11 +42,12 @@ export const randomPlay = function ({commit}, {list}) { // 没有选择具体的
   commit(types.SET_PLAYING_STATE, true) // 开始播放
 }
 
-// 检索结果页,点击一首歌曲 向当前播放列表添加该歌曲 需要操作3个mutation 所以封装成一个action
+// 检索结果页/最近播放页,点击一首歌曲 向当前播放列表添加该歌曲
 export const insertSong = function ({commit, state}, song) {  // song是待插入的歌曲
-  // 通过state拿到待修改的三个数据(所以state要作为参数传入)
+  // 通过state拿到待修改的三个数据
   let playList = state.playList.slice()
-  let sequenceList = state.sequenceList.slice() // 不建议在mutation回调外修改引用类型 可以创建副本 对副本进行修改
+  // 不建议在mutation回调外修改引用类型(会警告) 最好在mutation回调里修改state 可以创建副本 对副本进行修改
+  let sequenceList = state.sequenceList.slice()
   let currentIndex = state.currentIndex // 值类型本身就是弱关联,不需要创建副本
 
   // 编写逻辑对3个数据副本进行修改
@@ -56,19 +57,18 @@ export const insertSong = function ({commit, state}, song) {  // song是待插�
 
   currentIndex++ // 要插入的位置是当前索引的下一个(因为是值类型,所以不会修改state.currentIndex)
   playList.splice(currentIndex, 0, song)  // 插入歌曲
-  // playList是引用类型 这种修改会影响到state.playList本身 而这种修改行为不是在mutation的回调里 而是在外部 是会警告的
 
   if (fpIndex > -1) { // playList已经包含了这首歌
-    if (currentIndex > fpIndex) { // 当前插入的序号大于列表中的序号
-      playList.splice(fpIndex, 1)
-      currentIndex--  // playList的当前索引是有意义的 是定义在state里的
-    } else {
-      playList.splice(fpIndex + 1, 1)
+    if (currentIndex > fpIndex) { // 在已存在的歌曲后面插
+      playList.splice(fpIndex, 1) // 删掉重复歌曲
+      currentIndex--  // 前移一个(playList的当前索引是有意义的 是定义在state里的)
+    } else {  // 在已存在的歌曲前面插
+      playList.splice(fpIndex + 1, 1) // 已存在的歌曲后移一个位置,把它删掉(去重) currentIndex不变
     }
   }
 
   // sequenceList
-  let currentSIndex = findIndex(sequenceList, currentSong) + 1  // sequenceList中待插入的位置 currentSong一开始已记录
+  let currentSIndex = findIndex(sequenceList, currentSong) + 1  // 在sequenceList中找到当前歌曲 待插入的位置是下一个
   let fsIndex = findIndex(sequenceList, song) // 判断sequenceList中是否有待插入的歌曲并返回索引
 
   sequenceList.splice(currentSIndex, 0, song) // 插入歌曲
@@ -82,7 +82,7 @@ export const insertSong = function ({commit, state}, song) {  // song是待插�
     }
   }
 
-  // 提交对3个值的更改 修改state
+  // 在mutation里提交对3个值的更改 修改state
   commit(types.SET_PLAYLIST, playList)  // 处理后的副本通过mutation的回调设置进state
   commit(types.SET_SEQUENCE_LIST, sequenceList)
   commit(types.SET_CURRENT_INDEX, currentIndex)

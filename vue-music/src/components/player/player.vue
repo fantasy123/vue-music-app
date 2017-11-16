@@ -109,7 +109,7 @@
     </transition>
     <play-list ref="playlist"></play-list>
     <!--播放列表位于播放器内核页面的底部-->
-    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end" @canplay="ready"></audio>
+    <audio ref="audio" :src="currentSong.url" @timeupdate="updateTime" @ended="end"></audio>
     <!--timeupdate在audio在播放时触发 回调为updateTime 参数为一个事件对象-->
   </div>
 </template>
@@ -164,9 +164,6 @@
       ])
     },
     methods: {
-      ready() {
-        this.savePlayHistory(this.currentSong)  // 把当前歌曲存入播放历史
-      },
       showPlaylist() {
         this.$refs.playlist.show()  // show由playlist暴露而出 控制自身的showFlag 实现外部控制显示/隐藏的目的
       },
@@ -452,6 +449,11 @@
         this.$nextTick(() => {
           newPlaying ? audio.play() : audio.pause() // 如果为真 调用audio的播放API 否则调用暂停API
         })
+      },
+      currentIndex () {
+        this.savePlayHistory(this.currentSong)  // 把当前歌曲存入播放历史
+        // 点击最近播放列表中的一首歌曲,相当于插入一首已存在于播放历史列表的歌曲,根据insertArray,当前歌曲置顶(unshift),已存在的歌曲删掉(splice)
+        // 往playHistory里写数据目前有2种渠道:切歌/点击最近播放列表
       }
     },
     components: {
