@@ -2,7 +2,7 @@
   <transition name="slide">
     <!--实现侧滑进入-->
     <div class="user-center">
-      <div class="back">
+      <div class="back" @click="back">
         <i class="icon-back"></i>
       </div>
       <div class="switches-wrapper">
@@ -13,7 +13,16 @@
         <span class="text">随机播放全部</span>
       </div>
       <div class="list-wrapper" ref="listWrapper">
-
+        <scroll :data="favoriteList" v-if="currentIndex === 0" ref="favoriteList" class="list-scroll">
+          <div class="list-inner">
+            <song-list :songs="favoriteList" @select="selectSong"></song-list>
+          </div>
+        </scroll>
+        <scroll :data="playHistory" v-if="currentIndex === 1" ref="playList" class="list-scroll">
+          <div class="list-inner">
+            <song-list :songs="playHistory" @select="selectSong"></song-list>
+          </div>
+        </scroll>
       </div>
     </div>
   </transition>
@@ -21,6 +30,10 @@
 
 <script type="text/ecmascript-6">
   import Switches from 'base/switches/switches'
+  import {mapGetters, mapActions} from 'vuex'
+  import Scroll from 'base/scroll/scroll'
+  import SongList from 'base/song-list/song-list'
+  import Song from 'common/js/song'
 
   export default {
     data() {
@@ -36,13 +49,32 @@
         currentIndex: 0
       }
     },
+    computed: {
+      ...mapGetters([
+        'favoriteList',
+        'playHistory'
+      ])
+    },
     methods: {
+      ...mapActions([
+        'insertSong'
+      ]),
       switchItem(index) {
         this.currentIndex = index
+      },
+      selectSong(song) {
+        this.insertSong(new Song(song))
+      },
+      back() {
+        this.$router.push({
+          path: '/'
+        })
       }
     },
     components: {
-      Switches
+      Switches,
+      Scroll,
+      SongList
     }
   }
 </script>
@@ -93,15 +125,15 @@
         vertical-align: middle
         font-size: $font-size-small
     .list-wrapper
-      //position: absolute
-      //top: 110px
-      //bottom: 0
-      //width: 100%
+      position: absolute
+      top: 110px
+      bottom: 0
+      width: 100%
       .list-scroll
-        //height: 100%
-        //overflow: hidden
+        height: 100%
+        overflow: hidden
         .list-inner
-          //padding: 20px 30px
+          padding: 20px 30px
     .no-result-wrapper
       //position: absolute
       //width: 100%

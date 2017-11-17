@@ -53,14 +53,14 @@ export const playerMixin = {
       'saveFavoriteList',
       'deleteFavoriteSong'
     ]),
-    getFavoriteIcon(song) { // 这个操作要关联当前的歌曲,所以这里的song传入this.currentSong
+    getFavoriteIcon(song) { // 如果是player组件里 song传入当前播放的歌曲
       if (this.isFavorite(song)) {
         return 'icon-favorite'
       }
 
       return 'icon-not-favorite'
     },
-    toggleFavorite(song) {
+    toggleFavorite(song) {  // 如果是playlist组件 song传入的应该是列表的每一首歌曲 如果还传入currentSong 列表每一首歌会被渲染成同一种收藏状态
       if (this.isFavorite(song)) {
         this.deleteFavoriteSong(song)
       } else {

@@ -19,8 +19,8 @@
             <li :key="item.id" class="item" ref="listItem" v-for="(item, index) in sequenceList" @click="selectItem(item, index)">
               <i class="current" :class="getCurrentIcon(item, index)"></i>
               <span class="text">{{item.name}}</span>
-              <span class="like">
-                <i class="icon-not-favorite"></i>
+              <span class="like" @click.stop="toggleFavorite(item)">
+                <i :class="getFavoriteIcon(item)"></i>
                 <!--not-favorite继承父元素的黄色,favorite另外一种颜色(红色)-->
               </span>
               <span class="delete" @click.stop="deleteOne(item)">
