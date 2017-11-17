@@ -8,6 +8,9 @@ const SEARCH_MAX_LENGTH = 15  // 最大存储空间
 const PLAY_KEY = '__play__'
 const PLAY_MAX_LENGTH = 200
 
+const FAVORITE_KEY = '__favorite__'
+const FAVORITE_MAX_LENGTH = 200
+
 function insertArray (arr, val, compare, maxLen) {  // compare用来检测当前数组是不是已经存在val
   const index = arr.findIndex(compare)
 
@@ -28,6 +31,7 @@ function insertArray (arr, val, compare, maxLen) {  // compare用来检测当前
   }
 }
 
+// insertArray比deleteFromArray多传入一个val参数 是因为删除只需要操作索引 插入需要操作具体的值arr.unshift(val)
 function deleteFromArray (arr, compare) {
   const index = arr.findIndex(compare)
 
@@ -85,4 +89,32 @@ export function savePlay (song) {
 
 export function loadPlay () { // 有写就有读
   return storage.get(PLAY_KEY, [])
+}
+
+export function saveFavorite (song) {
+  let songs = storage.get(FAVORITE_KEY, [])
+
+  insertArray(songs, song, (item) => {
+    return item.id === song.id  // 满足id相同(同一首歌) 返回所在索引 根据索引决定增删情况
+  }, FAVORITE_MAX_LENGTH)
+
+  storage.set(FAVORITE_KEY, songs)
+
+  return songs
+}
+
+export function deleteFavorite (song) {
+  let songs = storage.get(FAVORITE_KEY, [])
+
+  deleteFromArray(songs, (item) => {
+    return item.id === song.id
+  })
+
+  storage.set(FAVORITE_KEY, songs)
+
+  return songs
+}
+
+export function loadFavorite () {
+  return storage.get(FAVORITE_KEY, [])
 }
