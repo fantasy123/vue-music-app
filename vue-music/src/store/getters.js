@@ -15,7 +15,7 @@ export const mode = state => state.mode
 export const currentIndex = state => state.currentIndex
 
 // 计算属性
-export const currentSong = (state) => {
+export const currentSong = (state) => { // currentSong在getters.js里面通过state.playlist和state.currentIndex简单计算得到
   return state.playList[state.currentIndex] || {}
 }
 

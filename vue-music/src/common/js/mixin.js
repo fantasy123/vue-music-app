@@ -33,9 +33,10 @@ export const playerMixin = {
   computed: {
     ...mapGetters([
       'sequenceList',
-      'currentSong',
+      'currentSong',  // player.vue / playList.vue里面都可以全局访问到这个变量
       'mode',
-      'playList'
+      'playList',
+      'favoriteList'
     ]),
     iconMode () { // 实现playlist组件和player组件icon样式共享
       return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
@@ -48,6 +49,31 @@ export const playerMixin = {
       setPlayList: 'SET_PLAYLIST',
       setCurrentIndex: 'SET_CURRENT_INDEX'
     }),
+    ...mapActions([
+      'saveFavoriteList',
+      'deleteFavoriteSong'
+    ]),
+    getFavoriteIcon(song) { // 这个操作要关联当前的歌曲,所以这里的song传入this.currentSong
+      if (this.isFavorite(song)) {
+        return 'icon-favorite'
+      }
+
+      return 'icon-not-favorite'
+    },
+    toggleFavorite(song) {
+      if (this.isFavorite(song)) {
+        this.deleteFavoriteSong(song)
+      } else {
+        this.saveFavoriteList(song)
+      }
+    },
+    isFavorite(song) {
+      const index = this.favoriteList.findIndex((item) => {
+        return item.id === song.id
+      })
+
+      return index > -1
+    },
     changeMode () { // 实现playlist组件和player组件播放模式icon点击事件共享
       // 播放模式用数字表示方便计算
       const mode = (this.mode + 1) % 3  // 每点一次 模式+1 3次一循环
