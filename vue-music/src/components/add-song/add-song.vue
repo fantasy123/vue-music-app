@@ -36,6 +36,13 @@
         <!--有搜索内容显示搜索建议(suggest组件)-->
         <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
       </div>
+      <top-tip ref="topTip" :delay="delay">
+        <!--插槽里填入div结构-->
+        <div class="tip-title">
+          <i class="icon-ok"></i>
+          <span class="text">一首歌曲已被添加到播放队列</span>
+        </div>
+      </top-tip>
     </div>
     <!--short-cut和search-result由query控制交替显示-->
     <!--short-cut>tab+(list-wrapper>scroll+scroll) 2个scroll由tab控制显示-->
@@ -52,11 +59,13 @@
   import SongList from 'base/song-list/song-list'
   import Song from 'common/js/song'
   import SearchList from 'base/search-list/search-list'
+  import TopTip from 'base/top-tip/top-tip'
 
   export default {
     mixins: [searchMixin],
     data() {
       return {
+        delay: 1500,
         showFlag: false,
         showSinger: false,
         currentIndex: 0,
@@ -79,11 +88,16 @@
       ...mapActions([
         'insertSong'
       ]),
+      // 2个地方打开topTip:点击搜索建议列表/点击最近播放列表
       selectSong(song, index) {  // song-list点击项目,selectItem(item, index) => 派发select事件告诉外部歌曲item被选择了 => add-song监听select事件,调用selectSong
         // => 把被点击的歌曲插入到playlist
         if (index !== 0) {  // index === 0 <=> 第一首歌,就是当前播放的歌曲 不需要插入
           this.insertSong(new Song(song)) // 格式化插入的song
+          this.showTip()
         }
+      },
+      showTip() {
+        this.$refs.topTip.show()
       },
       show() {
         this.showFlag = true
@@ -102,6 +116,7 @@
       },
       selectSuggest() { // 除了saveSearch,还有其他操作,所以要加一层代理
         this.saveSearch() // 会调用saveSearchHistory这个action
+        this.showTip()
       },
       switchItem(index) {
         this.currentIndex = index
@@ -113,7 +128,8 @@
       Switches,
       Scroll,
       SongList,
-      SearchList
+      SearchList,
+      TopTip
     }
   }
 </script>
@@ -171,14 +187,14 @@
       bottom: 0
       width: 100%
     .tip-title
-      //text-align: center
-      //padding: 18px 0
-      //font-size: 0
+      text-align: center
+      padding: 18px 0
+      font-size: 0
       .icon-ok
-        //font-size: $font-size-medium
-        //color: $color-theme
-        //margin-right: 4px
+        font-size: $font-size-medium
+        color: $color-theme
+        margin-right: 4px
       .text
-        //font-size: $font-size-medium
-        //color: $color-text
+        font-size: $font-size-medium
+        color: $color-text
 </style>
