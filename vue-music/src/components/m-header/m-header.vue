@@ -2,6 +2,10 @@
   <div class="m-header">
     <div class="icon"></div>
     <h1 class="text">Chicken Music</h1>
+    <router-link to="/user" class="mine" tag="div">
+      <!--路由决定组件间的映射和跳转关系-->
+      <i class="icon-mine"></i>
+    </router-link>
   </div>
 </template>
 
@@ -35,4 +39,13 @@
       vertical-align: top
       font-size: $font-size-large
       line-height: 44px
+    .mine
+      position: absolute
+      top: 0
+      right: 0
+      .icon-mine
+        display: block
+        padding: 12px
+        font-size: 20px
+        color: $color-theme
 </style>
