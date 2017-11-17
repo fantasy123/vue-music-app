@@ -35,6 +35,10 @@
       beforeScroll: { // 决定是否要监听beforeScrollStart事件的变量 记
         type: Boolean,
         default: false
+      },
+      refreshDelay: {
+        type: Number,
+        default: 20
       }
     },
     mounted () {  // dom ready
@@ -98,7 +102,7 @@
       data () {  // 减轻组件调用者的负担 调用者只管传数据给scroll组件 至于检测数据变化刷新dom应该放在组件内部完成
         setTimeout(() => {
           this.refresh()  // 已经封装成一个代理方法了 不用this.scroll.refresh()这样调用
-        }, 20)
+        }, this.refreshDelay) // 保证了在refreshDelay时间后去refresh 高度已经OK
       }
     }
   }

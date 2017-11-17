@@ -80,7 +80,10 @@ export const playerMixin = {
 export const searchMixin = {  // add-song和search组件公用逻辑:监听listScroll调用blurInput/saveSearch
   data() {
     return {
-      query: ''
+      query: '',
+      refreshDelay: 100 // 假如一个scroll组件里面包含的元素运用到了transition-group动画
+      // 那么调用这个scroll组件的父组件(search/add-song/playlist)就要props down一个100ms的refreshDelay 使scroll等待动画完成再延迟刷新
+      // playlist里面scroll直接包含一个transition-group search和add-song里面scroll组件都包含一个search-list组件,search-list组件包含动画
     }
   },
   computed: {

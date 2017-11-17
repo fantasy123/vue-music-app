@@ -20,7 +20,7 @@
               <song-list :songs="playHistory" @select="selectSong"></song-list>
             </div>
           </scroll>
-          <scroll v-if="currentIndex === 1" class="list-scroll" :data="searchHistory" ref="searchList">
+          <scroll v-if="currentIndex === 1" class="list-scroll" :data="searchHistory" ref="searchList" :refreshDelay="refreshDelay">
             <!--search组件和add-song组件都要渲染搜索历史,所以searchMixin里通过getter拿到searchHistory-->
             <div class="list-inner">
               <search-list :searches="searchHistory" @delete="deleteSearchHistory" @select="addQuery"></search-list>

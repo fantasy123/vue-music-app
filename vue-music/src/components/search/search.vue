@@ -4,7 +4,7 @@
       <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
     <div class="shortcut-wrapper" v-show="!query" ref="shortcutWrapper">
-      <scroll class="shortcut" :data="shortCut" ref="shortCut">
+      <scroll class="shortcut" :data="shortCut" ref="shortCut" :refreshDelay="refreshDelay">
         <div> <!--包含2块,只会根据第一块的高度计算Scroll,所以用一个DIV把2块包起来-->
           <!--同时因为子块中的数据(hotKey和searchHistory)分别异步获取,data传入哪个都不合适,所以用一个计算属性拼接一下这2个数据-->
           <div class="hot-key">

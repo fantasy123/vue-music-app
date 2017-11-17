@@ -12,7 +12,7 @@
             </span>
           </h1>
         </div>
-        <scroll class="list-content" :data="sequenceList" ref="listContent">
+        <scroll class="list-content" :data="sequenceList" ref="listContent" :refreshDelay="refreshDelay">
           <transition-group ref="list" name="list" tag="ul">
             <!--让transition-group渲染成一个ul-->
             <!--子元素要用一个key来互相区分-->
@@ -58,7 +58,9 @@
     mixins: [playerMixin],
     data() {
       return {
-        showFlag: false
+        showFlag: false,
+        refreshDelay: 100 // scroll默认检测数据变化刷新延迟是20ms 这个组件里因为删除动画要经历100ms的时延 所以会导致高度计算不对
+        // 通过给scroll加一个属性 外部控制时延 在动画执行完成后再刷新
       }
     },
     computed: {

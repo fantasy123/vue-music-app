@@ -1,6 +1,7 @@
 <template>
   <div class="search-list" v-show="searches.length">
     <transition-group name="list" tag="ul">
+      <!--这里有transition-group,所以所有用到search-list组件的父组件,都要传入refreshDelay-->
       <li :key="item" class="search-item" v-for="item in searches" @click="selectItem(item)">
         <span class="text">{{item}}</span>
         <span class="icon" @click.stop="deleteOne(item)">
