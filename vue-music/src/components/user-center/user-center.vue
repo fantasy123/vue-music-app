@@ -8,7 +8,7 @@
       <div class="switches-wrapper">
         <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
       </div>
-      <div class="play-btn" ref="playBtn">
+      <div class="play-btn" ref="playBtn" @click="random">
         <i class="icon-play"></i>
         <span class="text">随机播放全部</span>
       </div>
@@ -34,8 +34,10 @@
   import Scroll from 'base/scroll/scroll'
   import SongList from 'base/song-list/song-list'
   import Song from 'common/js/song'
+  import {playlistMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playlistMixin],
     data() {
       return {
         switches: [
@@ -57,8 +59,23 @@
     },
     methods: {
       ...mapActions([
-        'insertSong'
+        'insertSong',
+        'randomPlay'
       ]),
+      handlePlayList(list) {
+        const bottom = list.length ? '60px' : ''
+
+        this.$refs.listWrapper.style.bottom = bottom
+      },
+      random() {
+        let list = this.currentIndex === 0 ? this.favoriteList : this.playHistory
+        // 这里的list需要包装一下,getLyric这些方法 只有Song的实例才有
+        list = list.map((song) => {
+          return new Song(song)
+        })
+
+        this.randomPlay({list}) // 注意这里传参数的方式,包裹在一个对象里
+      },
       switchItem(index) {
         this.currentIndex = index
       },
@@ -66,9 +83,7 @@
         this.insertSong(new Song(song))
       },
       back() {
-        this.$router.push({
-          path: '/'
-        })
+        this.$router.back()
       }
     },
     components: {

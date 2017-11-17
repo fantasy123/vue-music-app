@@ -35,8 +35,8 @@ export const selectPlay = function ({commit, state}, {list, index}) { // 需要�
 // 随机播放一个列表也是一系列操作封装而成
 export const randomPlay = function ({commit}, {list}) { // 没有选择具体的歌曲  不需要传入index 写死为从第一首开始播放
   commit(types.SET_PLAY_MODE, playMode.random)  // 设置播放模式为随机播放
-  commit(types.SET_SEQUENCE_LIST, list) // 顺序列表是原材料
-  let randomList = shuffle(list)  // list在music-list组件里为this.songs
+  commit(types.SET_SEQUENCE_LIST, list) // 把传入的列表设置为顺序列表
+  let randomList = shuffle(list)  // 打乱顺序列表,得到随机列表
   commit(types.SET_PLAYLIST, randomList)
   commit(types.SET_CURRENT_INDEX, 0)  // 从随机列表的第一个开始播放
   commit(types.SET_FULL_SCREEN, true) // 依然需要展开播放器
