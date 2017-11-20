@@ -1,3 +1,4 @@
+// npm run build <=> package.json/scripts: "build": "node build/build.js", => 生成dist目录
 require('./check-versions')()
 
 process.env.NODE_ENV = 'production'
