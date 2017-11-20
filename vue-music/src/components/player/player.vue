@@ -323,6 +323,11 @@
       },
       _getlyric() {
         this.currentSong.getlyric().then((lyric) => { // 还可以接收一个回调函数 进行更细致的操作
+          // 如果当前歌曲的歌词对象还没有new好,已经切到下一首歌了 那中断new的进程
+          if (this.currentSong.lyric !== lyric) {
+            return  // 获取歌词是异步操作 快速切换的时候会重新创建新歌词对象 导致歌词乱掉
+          }
+
           this.currentLyric = new Lyric(lyric, this.handleLyric)  // 传入Song类的getlyric方法得到的歌词 构造一个规范化各行歌词信息的歌词实例
 
           if (this.playing) { // 如果歌曲正在播放
@@ -436,7 +441,9 @@
         }
 
         // 微信里运行 切到后台 JS无法执行 但audio可以把当前这首歌播放完 触发end的时候 end的回调JS就不会被执行
-        setTimeout(() => {
+        clearTimeout(this.timer)
+
+        this.timer = setTimeout(() => {
           this.$refs.audio.play()
           this._getlyric() // 歌曲播放立刻加载歌词  每次currentSong改变 都会new Lyric() 开启一个计时器
         }, 1000)
