@@ -72,7 +72,7 @@ module.exports = app.listen(port, function (err) {
     return
   }
 
-  console.log(`Listening at http://localhost:${port}\n`)
+  console.log(`Listen at http://localhost:${port}\n`)
 })
 
 // node这个js文件 可以在9000端口访问到这个项目
