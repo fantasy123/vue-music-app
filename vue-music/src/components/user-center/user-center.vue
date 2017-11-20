@@ -24,6 +24,10 @@
           </div>
         </scroll>
       </div>
+      <div class="no-result-wrapper" v-show="noResult">
+        <!--涉及2个数据,用计算属性来控制显示-->
+        <no-result :title="noResultDesc"></no-result>
+      </div>
     </div>
   </transition>
 </template>
@@ -35,6 +39,7 @@
   import SongList from 'base/song-list/song-list'
   import Song from 'common/js/song'
   import {playlistMixin} from 'common/js/mixin'
+  import NoResult from 'base/no-result/no-result'
 
   export default {
     mixins: [playlistMixin],
@@ -55,7 +60,21 @@
       ...mapGetters([
         'favoriteList',
         'playHistory'
-      ])
+      ]),
+      noResult() {
+        if (this.currentIndex === 0) {
+          return !this.favoriteList.length  // 在第一个tab下 如果没有喜欢数据 暂无就显示
+        } else {
+          return !this.playHistory.length
+        }
+      },
+      noResultDesc() {
+        if (this.currentIndex === 0) {
+          return '暂无收藏歌曲'
+        } else {
+          return '暂无播放记录'
+        }
+      }
     },
     methods: {
       ...mapActions([
@@ -66,9 +85,17 @@
         const bottom = list.length ? '60px' : ''
 
         this.$refs.listWrapper.style.bottom = bottom
+
+        // 因为用到v-if指令 所以要做存在性判断
+        this.$refs.favoriteList && this.$refs.favoriteList.refresh()
+        this.$refs.playList && this.$refs.playList.refresh()
       },
       random() {
         let list = this.currentIndex === 0 ? this.favoriteList : this.playHistory
+
+        if (list.length === 0) {
+          return  // 连mutation都不会派发
+        }
         // 这里的list需要包装一下,getLyric这些方法 只有Song的实例才有
         list = list.map((song) => {
           return new Song(song)
@@ -89,7 +116,8 @@
     components: {
       Switches,
       Scroll,
-      SongList
+      SongList,
+      NoResult
     }
   }
 </script>
@@ -150,8 +178,8 @@
         .list-inner
           padding: 20px 30px
     .no-result-wrapper
-      //position: absolute
-      //width: 100%
-      //top: 50%
-      //transform: translateY(-50%)
+      position: absolute
+      width: 100%
+      top: 50%
+      transform: translateY(-50%)
 </style>
