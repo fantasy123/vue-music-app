@@ -9,6 +9,11 @@ import VueLazyLoad from 'vue-lazyload'  // 只加载首屏图片 其余图片要
 
 import 'common/stylus/index.styl' // 没配置common的别名的话会尝试从node_modules里去找 让你去"安装" 它并不是node里的模块
 
+/* eslint-disable no-unused-vars */
+import vConsole from 'vconsole'
+
+console.log('hello')  // vConsole重新实现了console.log
+
 fastclick.attach(document.body) // 解决移动端点击300ms的延时
 
 Vue.use(VueLazyLoad, {  // 注册插件
